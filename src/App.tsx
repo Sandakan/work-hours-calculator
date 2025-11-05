@@ -27,13 +27,13 @@ function App() {
 	};
 
 	return (
-		<div className="min-h-screen text-gray-900" style={{ background: 'linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%)' }}>
+		<div
+			className="min-h-screen text-gray-900"
+			style={{ background: 'linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%)' }}>
 			<div className="max-w-full mx-auto p-4 sm:p-6 lg:p-8">
 				<header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 fade-in">
 					<div>
-						<h1 className="text-3xl sm:text-4xl font-bold gradient-text">
-							Work Hours & Time Calculator
-						</h1>
+						<h1 className="text-3xl sm:text-4xl font-bold gradient-text">Work Hours & Time Calculator</h1>
 						<p className="text-gray-600 mt-2 text-sm sm:text-base flex items-center gap-2">
 							<span>📊</span>
 							<span>Modern UI with charts and real-time tracking</span>

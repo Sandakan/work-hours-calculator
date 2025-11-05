@@ -55,7 +55,9 @@ export function TimeSumCalculator() {
 					<span>Sum times</span>
 				</button>
 			</div>
-			<pre id="ts-output" className="mt-4 text-base bg-white p-4 rounded-lg text-gray-800 border-2 border-violet-300 shadow-sm leading-relaxed"
+			<pre
+				id="ts-output"
+				className="mt-4 text-base bg-white p-4 rounded-lg text-gray-800 border-2 border-violet-300 shadow-sm leading-relaxed"
 				style={{ fontFamily: 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif', fontWeight: '600' }}>
 				{output}
 			</pre>

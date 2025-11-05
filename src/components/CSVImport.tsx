@@ -209,7 +209,9 @@ export function CSVImport({ onImport }: CSVImportProps) {
 					</button>
 				</div>
 			</div>
-			<div id="csv-feedback" className="mt-3 text-xs text-gray-600 bg-gray-50 rounded-lg p-2 border border-gray-200 min-h-8 flex items-center">
+			<div
+				id="csv-feedback"
+				className="mt-3 text-xs text-gray-600 bg-gray-50 rounded-lg p-2 border border-gray-200 min-h-8 flex items-center">
 				{feedback || 'No file imported yet'}
 			</div>
 			{tableData.length > 0 && (
@@ -232,9 +234,12 @@ export function CSVImport({ onImport }: CSVImportProps) {
 									<td className="px-4 py-3 text-gray-700">
 										{row.details.map((detail, didx) => (
 											<div key={`${row.date}-${didx}`} className="mb-1 last:mb-0">
-												<strong className="text-gray-900">{detail.task}</strong> 
-												<span className="text-gray-500"> ({detail.category})</span> - 
-												<span className="text-violet-600"> {detail.hrs}h {detail.mins}m</span>
+												<strong className="text-gray-900">{detail.task}</strong>
+												<span className="text-gray-500"> ({detail.category})</span> -
+												<span className="text-violet-600">
+													{' '}
+													{detail.hrs}h {detail.mins}m
+												</span>
 											</div>
 										))}
 									</td>

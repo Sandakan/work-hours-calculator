@@ -275,6 +275,154 @@ export function CategoryChart({ parsedRows }: { parsedRows: Record<string, unkno
 	return <Doughnut data={data} options={options} />;
 }
 
+export function EarningsProgressChart({ result }: { result: WorkHoursResult | null }) {
+	if (!result || result.hourlyRate === 0) {
+		return <div className="text-sm text-gray-500">No earnings data - set hourly rate first</div>;
+	}
+
+	const completedEarnings = result.completedEarnings;
+	const remainingEarnings = Math.max(0, result.remainingEarnings);
+
+	const data = {
+		labels: ['Earned', 'Remaining'],
+		datasets: [
+			{
+				data: [completedEarnings, remainingEarnings],
+				backgroundColor: ['#10b981', '#fef3c7'],
+			},
+		],
+	};
+
+	const options = {
+		plugins: {
+			legend: { position: 'bottom' as const },
+			tooltip: {
+				callbacks: {
+					label: (context: unknown) => {
+						const ctx = context as { label: string; parsed: number };
+						return `${ctx.label}: Rs ${ctx.parsed.toFixed(2)}`;
+					},
+				},
+			},
+		},
+		responsive: true,
+		maintainAspectRatio: true,
+	} as const;
+
+	return <Doughnut data={data} options={options} />;
+}
+
+export function EarningsOverTimeChart({ result }: { result: WorkHoursResult | null }) {
+	if (!result || result.hourlyRate === 0) {
+		return <div className="text-sm text-gray-500">No earnings data - set hourly rate first</div>;
+	}
+
+	const labels = result.days.map((d) => d.date.toLocaleDateString());
+	let cumulativeEarnings = result.completedEarnings;
+	const projectedEarnings = result.days.map((d) => {
+		if (d.work) {
+			cumulativeEarnings += result.earningsPerDay;
+		}
+		return Math.round(cumulativeEarnings * 100) / 100;
+	});
+
+	const data = {
+		labels,
+		datasets: [
+			{
+				label: 'Projected cumulative earnings (Rs)',
+				data: projectedEarnings,
+				borderColor: '#10b981',
+				backgroundColor: '#10b98144',
+				tension: 0.3,
+				fill: true,
+				borderWidth: 2,
+				pointRadius: 3,
+				pointBackgroundColor: '#10b981',
+			},
+		],
+	};
+
+	const options = {
+		scales: {
+			y: {
+				beginAtZero: false,
+				ticks: {
+					callback: (value: string | number) => {
+						return 'Rs ' + value;
+					},
+				},
+			},
+		},
+		responsive: true,
+		maintainAspectRatio: false,
+		plugins: {
+			legend: { position: 'bottom' as const },
+			tooltip: {
+				callbacks: {
+					label: (context: unknown) => {
+						const ctx = context as { dataset: { label: string }; parsed: { y: number } };
+						return `${ctx.dataset.label}: Rs ${ctx.parsed.y.toFixed(2)}`;
+					},
+				},
+			},
+		},
+	} as const;
+
+	return <Line data={data} options={options} />;
+}
+
+export function DailyEarningsChart({ result }: { result: WorkHoursResult | null }) {
+	if (!result || result.hourlyRate === 0) {
+		return <div className="text-sm text-gray-500">No earnings data - set hourly rate first</div>;
+	}
+
+	const labels = result.days.map((d) => d.date.toLocaleDateString());
+	const earningsData = result.days.map((d) => (d.work ? result.earningsPerDay : 0));
+
+	const data = {
+		labels,
+		datasets: [
+			{
+				label: 'Daily earnings (Rs)',
+				data: earningsData,
+				backgroundColor: '#f59e0b',
+				borderColor: '#f59e0b',
+				borderWidth: 1,
+			},
+		],
+	};
+
+	const options = {
+		indexAxis: 'x' as const,
+		scales: {
+			y: {
+				beginAtZero: true,
+				ticks: {
+					callback: (value: string | number) => {
+						return 'Rs ' + value;
+					},
+				},
+			},
+		},
+		responsive: true,
+		maintainAspectRatio: false,
+		plugins: {
+			legend: { position: 'bottom' as const },
+			tooltip: {
+				callbacks: {
+					label: (context: unknown) => {
+						const ctx = context as { dataset: { label: string }; parsed: { y: number } };
+						return `${ctx.dataset.label}: Rs ${ctx.parsed.y.toFixed(2)}`;
+					},
+				},
+			},
+		},
+	} as const;
+
+	return <Bar data={data} options={options} />;
+}
+
 export function Charts({ result, actualsByDate, parsedRows }: ChartsProps) {
 	return (
 		<div className="max-w-6xl mx-auto p-6 fade-in">
@@ -296,6 +444,42 @@ export function Charts({ result, actualsByDate, parsedRows }: ChartsProps) {
 					</div>
 				</div>
 			</div>
+
+			{result && result.hourlyRate > 0 && (
+				<div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 mt-4 border border-gray-100 card-hover">
+					<h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+						<span className="text-2xl">💰</span>
+						<span>Earnings Overview</span>
+					</h3>
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+						<div className="bg-green-50 rounded-lg p-4 h-64 border border-green-200">
+							<div className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+								<span>💵</span>
+								<span>Earnings Progress</span>
+							</div>
+							<EarningsProgressChart result={result} />
+						</div>
+						<div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+							<div className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+								<span>📈</span>
+								<span>Projected Cumulative Earnings</span>
+							</div>
+							<div className="h-48">
+								<EarningsOverTimeChart result={result} />
+							</div>
+						</div>
+					</div>
+					<div className="mt-6">
+						<h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+							<span>💸</span>
+							<span>Daily Earnings Breakdown</span>
+						</h4>
+						<div className="bg-orange-50 rounded-lg p-4 h-64 border border-orange-200">
+							<DailyEarningsChart result={result} />
+						</div>
+					</div>
+				</div>
+			)}
 
 			<div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 mt-4 border border-gray-100 card-hover">
 				<h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">

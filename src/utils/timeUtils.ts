@@ -19,6 +19,11 @@ export function formatMinutes(totalMinutes: number): string {
 	return `${sign}${hrs} hrs ${mins} mins`;
 }
 
+// Format currency (Rs)
+export function formatCurrency(amount: number): string {
+	return `Rs ${amount.toFixed(2)}`;
+}
+
 // Determine start date depending on today and excludeToday
 export function determineStart(billingStart: Date, billingEnd: Date, excludeToday: boolean): Date {
 	const today = new Date();
@@ -52,6 +57,11 @@ export interface WorkHoursResult {
 	perDay: number;
 	skipped: string[];
 	days: Array<{ date: Date; work: boolean }>;
+	hourlyRate: number;
+	totalEarnings: number;
+	completedEarnings: number;
+	remainingEarnings: number;
+	earningsPerDay: number;
 }
 
 export function calcWorkHours(
@@ -61,7 +71,8 @@ export function calcWorkHours(
 	endStr: string,
 	skipSun: boolean,
 	skipSat: boolean,
-	excludeToday: boolean
+	excludeToday: boolean,
+	hourlyRate = 0
 ): WorkHoursResult {
 	const total = parseTime(totalStr);
 	const completed = parseTime(completedStr);
@@ -91,6 +102,13 @@ export function calcWorkHours(
 	}
 
 	const perDay = workdays > 0 ? remaining / workdays : 0;
+
+	// Calculate earnings
+	const totalEarnings = (total / 60) * hourlyRate;
+	const completedEarnings = (completed / 60) * hourlyRate;
+	const remainingEarnings = (remaining / 60) * hourlyRate;
+	const earningsPerDay = (perDay / 60) * hourlyRate;
+
 	return {
 		total,
 		completed,
@@ -102,6 +120,11 @@ export function calcWorkHours(
 		perDay,
 		skipped,
 		days,
+		hourlyRate,
+		totalEarnings,
+		completedEarnings,
+		remainingEarnings,
+		earningsPerDay,
 	};
 }
 

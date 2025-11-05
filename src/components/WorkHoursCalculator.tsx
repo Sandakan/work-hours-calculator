@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import { loadFormState, saveFormState } from '../utils/storage';
+import { hasSavedData, loadFormState, saveFormState } from '../utils/storage';
 import type { WorkHoursResult } from '../utils/timeUtils';
-import { calcWorkHours, formatMinutes } from '../utils/timeUtils';
+import { calcWorkHours, formatCurrency, formatMinutes } from '../utils/timeUtils';
 
 interface WorkHoursCalculatorProps {
 	onCalculate: (result: WorkHoursResult) => void;
@@ -16,6 +16,7 @@ export function WorkHoursCalculator({ onCalculate }: WorkHoursCalculatorProps) {
 	const [skipSunday, setSkipSunday] = useState(savedState.whSun);
 	const [skipSaturday, setSkipSaturday] = useState(savedState.whSat);
 	const [excludeToday, setExcludeToday] = useState(savedState.whExcludeToday);
+	const [hourlyRate, setHourlyRate] = useState(savedState.hourlyRate);
 	const [output, setOutput] = useState('Results will appear here');
 
 	// Save to localStorage whenever any input changes
@@ -28,12 +29,23 @@ export function WorkHoursCalculator({ onCalculate }: WorkHoursCalculatorProps) {
 			whSun: skipSunday,
 			whSat: skipSaturday,
 			whExcludeToday: excludeToday,
+			hourlyRate: hourlyRate,
 		});
-	}, [total, completed, startDate, endDate, skipSunday, skipSaturday, excludeToday]);
+	}, [total, completed, startDate, endDate, skipSunday, skipSaturday, excludeToday, hourlyRate]);
 
 	const handleCalculate = useCallback(() => {
 		try {
-			const result = calcWorkHours(total, completed, startDate, endDate, skipSunday, skipSaturday, excludeToday);
+			const rateValue = parseFloat(hourlyRate) || 0;
+			const result = calcWorkHours(
+				total,
+				completed,
+				startDate,
+				endDate,
+				skipSunday,
+				skipSaturday,
+				excludeToday,
+				rateValue
+			);
 
 			const out = [];
 			out.push('Total hours: ' + formatMinutes(result.total));
@@ -47,12 +59,29 @@ export function WorkHoursCalculator({ onCalculate }: WorkHoursCalculatorProps) {
 			);
 			out.push('Hours per day: ' + formatMinutes(result.perDay));
 
+			if (rateValue > 0) {
+				out.push('');
+				out.push('💰 EARNINGS BREAKDOWN');
+				out.push('Hourly rate: ' + formatCurrency(result.hourlyRate));
+				out.push('Total earnings: ' + formatCurrency(result.totalEarnings));
+				out.push('Completed earnings: ' + formatCurrency(result.completedEarnings));
+				out.push('Remaining earnings: ' + formatCurrency(result.remainingEarnings));
+				out.push('Earnings per day: ' + formatCurrency(result.earningsPerDay));
+			}
+
 			setOutput(out.join('\n'));
 			onCalculate(result);
 		} catch (e) {
 			setOutput('Error: ' + (e instanceof Error ? e.message : String(e)));
 		}
-	}, [total, completed, startDate, endDate, skipSunday, skipSaturday, excludeToday, onCalculate]);
+	}, [total, completed, startDate, endDate, skipSunday, skipSaturday, excludeToday, hourlyRate, onCalculate]);
+
+	// Auto-calculate on startup if data exists in localStorage
+	useEffect(() => {
+		if (hasSavedData()) {
+			handleCalculate();
+		}
+	}, [handleCalculate]);
 
 	return (
 		<section className="lg:col-span-2 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-100 card-hover">
@@ -91,6 +120,22 @@ export function WorkHoursCalculator({ onCalculate }: WorkHoursCalculatorProps) {
 						placeholder="e.g., 130 hrs 40 mins"
 						value={completed}
 						onChange={(e) => setCompleted(e.target.value)}
+					/>
+				</div>
+
+				<div>
+					<label htmlFor="wh-rate" className="text-sm font-medium text-gray-700 block mb-1">
+						💰 Hourly rate (Rs/hr)
+					</label>
+					<input
+						id="wh-rate"
+						type="number"
+						min="0"
+						step="0.01"
+						className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all"
+						placeholder="e.g., 500"
+						value={hourlyRate}
+						onChange={(e) => setHourlyRate(e.target.value)}
 					/>
 				</div>
 
@@ -163,8 +208,14 @@ export function WorkHoursCalculator({ onCalculate }: WorkHoursCalculatorProps) {
 						<span>📊</span>
 						<span>Summary</span>
 					</div>
-					<pre className="text-sm mt-2 bg-white rounded p-4 whitespace-pre-wrap break-all text-gray-800 leading-loose border border-violet-300 shadow-sm"
-						style={{ fontFamily: 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif', fontWeight: '500' }}>{output}</pre>
+					<pre
+						className="text-sm mt-2 bg-white rounded p-4 whitespace-pre-wrap break-all text-gray-800 leading-loose border border-violet-300 shadow-sm"
+						style={{
+							fontFamily: 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif',
+							fontWeight: '500',
+						}}>
+						{output}
+					</pre>
 				</div>
 			</div>
 		</section>
