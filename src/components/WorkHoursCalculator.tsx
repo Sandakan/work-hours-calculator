@@ -1,20 +1,35 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { WorkHoursResult } from '../utils/timeUtils';
 import { calcWorkHours, formatMinutes } from '../utils/timeUtils';
+import { loadFormState, saveFormState } from '../utils/storage';
 
 interface WorkHoursCalculatorProps {
 	onCalculate: (result: WorkHoursResult) => void;
 }
 
 export function WorkHoursCalculator({ onCalculate }: WorkHoursCalculatorProps) {
-	const [total, setTotal] = useState('160 hrs 0 mins');
-	const [completed, setCompleted] = useState('130 hrs 40 mins');
-	const [startDate, setStartDate] = useState('2025-07-25');
-	const [endDate, setEndDate] = useState('2025-08-28');
-	const [skipSunday, setSkipSunday] = useState(false);
-	const [skipSaturday, setSkipSaturday] = useState(false);
-	const [excludeToday, setExcludeToday] = useState(false);
+	const savedState = loadFormState();
+	const [total, setTotal] = useState(savedState.whTotal);
+	const [completed, setCompleted] = useState(savedState.whCompleted);
+	const [startDate, setStartDate] = useState(savedState.whStart);
+	const [endDate, setEndDate] = useState(savedState.whEnd);
+	const [skipSunday, setSkipSunday] = useState(savedState.whSun);
+	const [skipSaturday, setSkipSaturday] = useState(savedState.whSat);
+	const [excludeToday, setExcludeToday] = useState(savedState.whExcludeToday);
 	const [output, setOutput] = useState('Results will appear here');
+
+	// Save to localStorage whenever any input changes
+	useEffect(() => {
+		saveFormState({
+			whTotal: total,
+			whCompleted: completed,
+			whStart: startDate,
+			whEnd: endDate,
+			whSun: skipSunday,
+			whSat: skipSaturday,
+			whExcludeToday: excludeToday,
+		});
+	}, [total, completed, startDate, endDate, skipSunday, skipSaturday, excludeToday]);
 
 	const handleCalculate = useCallback(() => {
 		try {

@@ -22,7 +22,9 @@ interface ChartsProps {
 }
 
 export function ProgressChart({ result }: { result: WorkHoursResult | null }) {
-	if (!result) return null;
+	if (!result) {
+		return <div className="text-sm text-gray-500">No data</div>;
+	}
 
 	const completed = result.completed / 60;
 	const remaining = Math.max(0, result.remaining) / 60;
@@ -41,7 +43,7 @@ export function ProgressChart({ result }: { result: WorkHoursResult | null }) {
 		plugins: { legend: { position: 'bottom' as const } },
 		responsive: true,
 		maintainAspectRatio: true,
-	};
+	} as const;
 
 	return <Doughnut data={data} options={options} />;
 }
@@ -53,62 +55,74 @@ export function DailyChart({
 	result: WorkHoursResult | null;
 	actualsByDate: Record<string, number>;
 }) {
-	if (!result) return null;
+	if (!result) {
+		return <div className="text-sm text-gray-500">No data - calculate work hours first</div>;
+	}
 
 	const labels = result.days.map((d) => d.date.toLocaleDateString());
-	const plannedData = result.days.map((d) => (d.work ? Math.round((result.perDay / 60) * 100) / 100 : 0));
+	// Convert perDay from minutes to hours (perDay is in minutes)
+	const perDayHours = result.perDay / 60;
+	const plannedData = result.days.map((d) => (d.work ? perDayHours : 0));
 	const actualData = result.days.map((d) => {
 		const k = d.date.toISOString().slice(0, 10);
 		return Math.round(((actualsByDate[k] || 0) / 60) * 100) / 100;
 	});
 
-	const data = {
+	const barData = {
 		labels,
 		datasets: [
 			{
-				label: 'Hours to work (per day)',
+				label: 'Planned hours per day',
 				data: plannedData,
 				backgroundColor: '#7c3aed',
+				borderColor: '#7c3aed',
+				borderWidth: 1,
 			},
 		],
 	};
 
-	const options = {
-		scales: { y: { beginAtZero: true } },
+	const barOptions = {
+		indexAxis: 'x' as const,
+		scales: { y: { beginAtZero: true, max: Math.max(...plannedData, ...actualData) * 1.2 || 10 } },
 		responsive: true,
-		maintainAspectRatio: true,
+		maintainAspectRatio: false,
 		plugins: { legend: { position: 'bottom' as const } },
-	};
+	} as const;
 
 	return (
-		<>
-			<Bar data={data} options={options} />
+		<div className="space-y-4 w-full">
+			<div className="h-64 w-full">
+				<Bar data={barData} options={barOptions} />
+			</div>
 			{actualData.some((v) => v > 0) && (
-				<div className="mt-4">
+				<div className="h-64 w-full">
 					<Line
 						data={{
 							labels,
 							datasets: [
 								{
-									label: 'Actual (imported)',
+									label: 'Actual hours (imported)',
 									data: actualData,
 									borderColor: '#10b981',
 									backgroundColor: '#10b98144',
 									tension: 0.2,
 									fill: true,
+									borderWidth: 2,
 								},
 							],
 						}}
-						options={{
-							scales: { y: { beginAtZero: true } },
-							responsive: true,
-							maintainAspectRatio: true,
-							plugins: { legend: { position: 'bottom' as const } },
-						}}
+						options={
+							{
+								scales: { y: { beginAtZero: true } },
+								responsive: true,
+								maintainAspectRatio: false,
+								plugins: { legend: { position: 'bottom' as const } },
+							} as const
+						}
 					/>
 				</div>
 			)}
-		</>
+		</div>
 	);
 }
 
@@ -119,7 +133,9 @@ export function BurnDownChart({
 	result: WorkHoursResult | null;
 	actualsByDate: Record<string, number>;
 }) {
-	if (!result) return null;
+	if (!result) {
+		return <div className="text-sm text-gray-500">No data - calculate work hours first</div>;
+	}
 
 	const totalMin = result.total;
 	let plannedRemaining = totalMin;
@@ -149,23 +165,38 @@ export function BurnDownChart({
 				label: 'Planned remaining (hrs)',
 				data: plannedSeries,
 				borderColor: '#7c3aed',
+				backgroundColor: 'transparent',
 				fill: false,
+				tension: 0.3,
+				borderWidth: 2,
+				pointRadius: 3,
+				pointBackgroundColor: '#7c3aed',
 			},
 			{
 				label: 'Actual remaining (hrs)',
 				data: actualSeries,
 				borderColor: '#10b981',
+				backgroundColor: 'transparent',
 				fill: false,
+				tension: 0.3,
+				borderWidth: 2,
+				pointRadius: 3,
+				pointBackgroundColor: '#10b981',
 			},
 		],
 	};
 
 	const options = {
-		scales: { y: { beginAtZero: true } },
+		scales: {
+			y: {
+				beginAtZero: true,
+				max: Math.max(...plannedSeries, ...actualSeries) * 1.1 || 100,
+			},
+		},
 		responsive: true,
-		maintainAspectRatio: true,
+		maintainAspectRatio: false,
 		plugins: { legend: { position: 'bottom' as const } },
-	};
+	} as const;
 
 	return <Line data={data} options={options} />;
 }
@@ -175,7 +206,7 @@ export function HistogramChart({ actualsByDate }: { actualsByDate: Record<string
 	const actualHours = keys.map((k) => actualsByDate[k] / 60);
 
 	if (actualHours.length === 0) {
-		return <div className="text-sm muted">No data</div>;
+		return <div className="text-sm text-gray-500">No data</div>;
 	}
 
 	const bins = 10;
@@ -200,9 +231,9 @@ export function HistogramChart({ actualsByDate }: { actualsByDate: Record<string
 	const options = {
 		scales: { y: { beginAtZero: true } },
 		responsive: true,
-		maintainAspectRatio: true,
+		maintainAspectRatio: false,
 		plugins: { legend: { position: 'bottom' as const } },
-	};
+	} as const;
 
 	return <Bar data={data} options={options} />;
 }
@@ -222,7 +253,7 @@ export function CategoryChart({ parsedRows }: { parsedRows: Record<string, unkno
 	const catData = catLabels.map((k) => Math.round((catMap[k] / 60) * 100) / 100);
 
 	if (catLabels.length === 0) {
-		return <div className="text-sm muted">No data</div>;
+		return <div className="text-sm text-gray-500">No data</div>;
 	}
 
 	const data = {
@@ -239,7 +270,7 @@ export function CategoryChart({ parsedRows }: { parsedRows: Record<string, unkno
 		plugins: { legend: { position: 'bottom' as const } },
 		responsive: true,
 		maintainAspectRatio: true,
-	};
+	} as const;
 
 	return <Doughnut data={data} options={options} />;
 }
@@ -250,7 +281,7 @@ export function Charts({ result, actualsByDate, parsedRows }: ChartsProps) {
 			<div className="bg-white rounded-lg shadow p-6 mt-4">
 				<h3 className="text-md font-medium mb-2">Progress</h3>
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<div className="bg-gray-50 rounded p-4">
+					<div className="bg-gray-50 rounded p-4 h-64">
 						<ProgressChart result={result} />
 					</div>
 					<div className="bg-gray-50 rounded p-4">
@@ -262,7 +293,7 @@ export function Charts({ result, actualsByDate, parsedRows }: ChartsProps) {
 
 			<div className="bg-white rounded-lg shadow p-6 mt-4">
 				<h3 className="text-md font-medium mb-2">Burn-down / Forecast</h3>
-				<div className="h-96">
+				<div className="h-96 w-full">
 					<BurnDownChart result={result} actualsByDate={actualsByDate} />
 				</div>
 			</div>

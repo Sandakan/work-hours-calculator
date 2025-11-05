@@ -6,7 +6,7 @@ A modern React application for calculating work hours, tracking project progress
 
 This is a complete React rewrite of the Work Hours Calculator, transforming the original HTML/JavaScript application into a production-ready React + TypeScript application with Tailwind CSS and interactive Chart.js visualizations.
 
-**Live Demo**: `http://localhost:5174/` (when dev server is running)
+**Live Demo**: `http://localhost:5173/` (when dev server is running)
 
 ## Features
 

@@ -1,7 +1,8 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { parseCSV } from '../utils/csvUtils';
 import type { WorkHoursResult } from '../utils/timeUtils';
 import { calcWorkHours, parseTime } from '../utils/timeUtils';
+import { loadFormState, saveFormState } from '../utils/storage';
 
 interface CSVImportProps {
 	onImport: (
@@ -32,6 +33,7 @@ function buildDaysBetween(a: Date, b: Date, skipSun: boolean = false, skipSat: b
 }
 
 export function CSVImport({ onImport }: CSVImportProps) {
+	const savedState = loadFormState();
 	const [csvBuffer, setCsvBuffer] = useState<string | null>(null);
 	const [feedback, setFeedback] = useState('');
 	const [tableData, setTableData] = useState<
@@ -47,8 +49,13 @@ export function CSVImport({ onImport }: CSVImportProps) {
 			}>;
 		}>
 	>([]);
-	const [requiredHours, setRequiredHours] = useState('');
+	const [requiredHours, setRequiredHours] = useState(savedState.csvRequired);
 	const fileInputRef = useRef<HTMLInputElement>(null);
+
+	// Save requiredHours to localStorage when it changes
+	useEffect(() => {
+		saveFormState({ csvRequired: requiredHours });
+	}, [requiredHours]);
 
 	const handleFileImport = async () => {
 		const file = fileInputRef.current?.files?.[0];

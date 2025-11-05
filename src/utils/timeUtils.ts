@@ -23,8 +23,19 @@ export function formatMinutes(totalMinutes: number): string {
 export function determineStart(billingStart: Date, billingEnd: Date, excludeToday: boolean): Date {
 	const today = new Date();
 	today.setHours(0, 0, 0, 0);
-	if (today > billingEnd) return new Date(billingEnd.getTime() + 1);
-	if (today < billingStart) return new Date(billingStart);
+
+	// If today is before billing start, start from billing start
+	if (today < billingStart) {
+		return new Date(billingStart);
+	}
+
+	// If today is after billing end, still use billing start (for past periods)
+	// This allows calculating work hours for completed periods
+	if (today > billingEnd) {
+		return new Date(billingStart);
+	}
+
+	// Today is within the billing period
 	const s = new Date(today);
 	if (excludeToday) s.setDate(s.getDate() + 1);
 	return s;

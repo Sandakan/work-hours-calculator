@@ -1,13 +1,20 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { formatMinutes, sumTimeStrings } from '../utils/timeUtils';
+import { loadFormState, saveFormState } from '../utils/storage';
 
 export function TimeSumCalculator() {
-	const [input, setInput] = useState(`37 hrs 56 mins
+	const savedState = loadFormState();
+	const [input, setInput] = useState(savedState.tsInput || `37 hrs 56 mins
 29 hrs 44 mins
 41 hrs 1 min
 48 hrs 13 min
 17 hrs 43 min`);
-	const [output, setOutput] = useState('Total time will appear here');
+	const [output, setOutput] = useState(savedState.tsOutput || 'Total time will appear here');
+
+	// Save input to localStorage when it changes
+	useEffect(() => {
+		saveFormState({ tsInput: input, tsOutput: output });
+	}, [input, output]);
 
 	const handleSumTimes = useCallback(() => {
 		try {
