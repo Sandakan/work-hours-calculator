@@ -18,6 +18,16 @@ This is a complete React rewrite of the Work Hours Calculator, transforming the 
 - Real-time calculation results
 - Detailed summary output
 
+### ⏱️ WakaTime Project Tracker (NEW!)
+
+- Automatically fetch hours worked from WakaTime.com
+- Track time spent on specific projects
+- Visual breakdown by programming languages and editors
+- Daily hours visualization
+- Date range filtering
+- Secure API key storage (local browser only)
+- Compare WakaTime data with manual entries
+
 ### 📁 CSV Import & Processing
 
 - Import CSV files with date, task, category, hours, and minutes
@@ -30,8 +40,11 @@ This is a complete React rewrite of the Work Hours Calculator, transforming the 
 1. **Progress Chart** - Donut chart showing completed vs. remaining hours
 2. **Daily Plan Chart** - Bar chart with actual hours overlay
 3. **Burn-down Chart** - Line chart tracking planned vs. actual progress
-4. **Actuals Histogram** - Distribution of daily work hours
-5. **Category Breakdown** - Pie chart by category
+3. **Actuals Histogram** - Distribution of daily work hours
+4. **Category Breakdown** - Pie chart by category
+5. **WakaTime Language Distribution** - Pie chart showing time by programming language
+6. **WakaTime Editor Usage** - Donut chart showing time by editor/IDE
+7. **Daily WakaTime Hours** - Bar chart of hours tracked per day
 
 ### 🔢 Time Sum Calculator
 
@@ -119,11 +132,37 @@ npm run lint
 5. Click **Calculate**
 6. View results and automatic chart updates
 
+### WakaTime Project Tracking
+
+**Prerequisites:**
+
+- Active WakaTime account (free at [wakatime.com](https://wakatime.com))
+- WakaTime plugin installed in your IDE/editor
+- At least one tracked project
+
+**Steps:**
+
+1. Get your API key from [WakaTime Settings](https://wakatime.com/settings/account)
+2. Enter your **Secret API Key** in the WakaTime tracker section
+3. (Optional) Check "Remember API key" to store it locally
+4. Click **Test** to validate your API key
+5. Enter the **Project Name** (exact name as shown in WakaTime dashboard)
+6. Select **Start** and **End** dates for the tracking period
+7. Click **Fetch Data** to retrieve your tracked hours
+8. View summary statistics, language breakdown, and editor usage
+9. Charts automatically update with WakaTime data
+
+**Security Note:**
+
+- Your API key is stored only in your browser's local storage
+- It is never sent to any third-party servers except WakaTime
+- Uncheck "Remember API key" for added security on shared computers
+
 ### CSV Import
 
 **CSV Format Required:**
 
-```
+```csv
 Date,Task,Category,HRS,MINS
 2025-07-25,Design,Backend,8,30
 2025-07-25,Testing,QA,2,15

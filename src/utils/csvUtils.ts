@@ -73,3 +73,47 @@ export function parseCSV(csvText: string): {
 
 	return { actualsByDate, parsedRows, grouped: sortedRows };
 }
+
+/**
+ * Exports WakaTime daily data to CSV format
+ * @param dailyData - Map of date to hours worked
+ * @param projectName - Name of the project
+ * @returns CSV string
+ */
+export function exportWakaTimeToCSV(dailyData: Record<string, number>, projectName: string): string {
+	const headers = ['Date', 'Task', 'Category', 'HRS', 'MINS'];
+	const rows: string[][] = [headers];
+
+	// Sort dates
+	const sortedDates = Object.keys(dailyData).sort();
+
+	for (const date of sortedDates) {
+		const totalHours = dailyData[date];
+		const hrs = Math.floor(totalHours);
+		const mins = Math.round((totalHours - hrs) * 60);
+
+		rows.push([date, `WakaTime - ${projectName}`, 'Development', String(hrs), String(mins)]);
+	}
+
+	// Convert to CSV
+	return rows.map((row) => row.join(',')).join('\n');
+}
+
+/**
+ * Downloads CSV file to user's computer
+ * @param csvContent - CSV content as string
+ * @param filename - Name of the file to download
+ */
+export function downloadCSV(csvContent: string, filename: string): void {
+	const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+	const link = document.createElement('a');
+	const url = URL.createObjectURL(blob);
+
+	link.setAttribute('href', url);
+	link.setAttribute('download', filename);
+	link.style.visibility = 'hidden';
+	document.body.appendChild(link);
+	link.click();
+	document.body.removeChild(link);
+	URL.revokeObjectURL(url);
+}

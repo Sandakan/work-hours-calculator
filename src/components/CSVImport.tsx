@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { parseCSV } from '../utils/csvUtils';
-import { loadFormState, saveFormState } from '../utils/storage';
 import type { WorkHoursResult } from '../utils/timeUtils';
-import { calcWorkHours, parseTime } from '../utils/timeUtils';
+import { calcWorkHours } from '../utils/timeUtils';
 
 interface CSVImportProps {
 	onImport: (
@@ -10,6 +9,22 @@ interface CSVImportProps {
 		actualsByDate: Record<string, number>,
 		parsedRows: Record<string, unknown>[]
 	) => void;
+	totalHours: string;
+	setTotalHours: (value: string) => void;
+	completedHours: string;
+	setCompletedHours: (value: string) => void;
+	hourlyRate: string;
+	setHourlyRate: (value: string) => void;
+	billingStart: string;
+	setBillingStart: (value: string) => void;
+	billingEnd: string;
+	setBillingEnd: (value: string) => void;
+	skipSunday: boolean;
+	setSkipSunday: (value: boolean) => void;
+	skipSaturday: boolean;
+	setSkipSaturday: (value: boolean) => void;
+	excludeToday: boolean;
+	setExcludeToday: (value: boolean) => void;
 }
 
 function buildDaysBetween(a: Date, b: Date, skipSun: boolean = false, skipSat: boolean = false) {
@@ -32,8 +47,25 @@ function buildDaysBetween(a: Date, b: Date, skipSun: boolean = false, skipSat: b
 	return { days, workdays, remainingDays, skipped };
 }
 
-export function CSVImport({ onImport }: CSVImportProps) {
-	const savedState = loadFormState();
+export function CSVImport({
+	onImport,
+	totalHours,
+	setTotalHours,
+	completedHours,
+	setCompletedHours,
+	hourlyRate,
+	setHourlyRate,
+	billingStart,
+	setBillingStart,
+	billingEnd,
+	setBillingEnd,
+	skipSunday,
+	setSkipSunday,
+	skipSaturday,
+	setSkipSaturday,
+	excludeToday,
+	setExcludeToday,
+}: CSVImportProps) {
 	const [csvBuffer, setCsvBuffer] = useState<string | null>(null);
 	const [feedback, setFeedback] = useState('');
 	const [tableData, setTableData] = useState<
@@ -49,13 +81,7 @@ export function CSVImport({ onImport }: CSVImportProps) {
 			}>;
 		}>
 	>([]);
-	const [requiredHours, setRequiredHours] = useState(savedState.csvRequired);
 	const fileInputRef = useRef<HTMLInputElement>(null);
-
-	// Save requiredHours to localStorage when it changes
-	useEffect(() => {
-		saveFormState({ csvRequired: requiredHours });
-	}, [requiredHours]);
 
 	const handleFileImport = async () => {
 		const file = fileInputRef.current?.files?.[0];
@@ -101,43 +127,26 @@ export function CSVImport({ onImport }: CSVImportProps) {
 			}));
 			setTableData(tableRows);
 
-			// Parse required hours
-			const reqInput = requiredHours.trim();
-			if (!reqInput) {
-				alert('Enter required hours in the required field');
-				return;
-			}
-
-			let requiredMin = 0;
-			if (/^\d+$/.test(reqInput)) {
-				requiredMin = Number(reqInput) * 60;
-			} else {
-				try {
-					requiredMin = parseTime(reqInput);
-				} catch {
-					alert('Required hours format invalid. Use "160" or "160 hrs 0 mins"');
-					return;
-				}
-			} // Calculate work hours
+			// Calculate completed hours from CSV
 			const sumActual = keys.reduce((s, k) => s + (newActuals[k] || 0), 0);
-			const billingStart = new Date(keys[0]);
-			const billingEnd = new Date(keys[keys.length - 1]);
-			billingStart.setHours(0, 0, 0, 0);
-			billingEnd.setHours(0, 0, 0, 0);
+			const completedStr = `${Math.floor(sumActual / 60)} hrs ${sumActual % 60} mins`;
+			setCompletedHours(completedStr);
 
-			const startStr = billingStart.toISOString().slice(0, 10);
-			const endStr = billingEnd.toISOString().slice(0, 10);
-			const r = calcWorkHours(
-				`${Math.floor(requiredMin / 60)} hrs ${requiredMin % 60} mins`,
-				`${Math.floor(sumActual / 60)} hrs ${sumActual % 60} mins`,
-				startStr,
-				endStr,
-				false,
-				false,
-				false
-			);
+			// Update billing dates from CSV data
+			const csvStartDate = new Date(keys[0]);
+			const csvEndDate = new Date(keys[keys.length - 1]);
+			csvStartDate.setHours(0, 0, 0, 0);
+			csvEndDate.setHours(0, 0, 0, 0);
 
-			const built = buildDaysBetween(billingStart, billingEnd, false, false);
+			const startStr = csvStartDate.toISOString().slice(0, 10);
+			const endStr = csvEndDate.toISOString().slice(0, 10);
+			setBillingStart(startStr);
+			setBillingEnd(endStr);
+
+			const rateValue = parseFloat(hourlyRate) || 0;
+			const r = calcWorkHours(totalHours, completedStr, startStr, endStr, false, false, false, rateValue);
+
+			const built = buildDaysBetween(csvStartDate, csvEndDate, false, false);
 			r.days = built.days;
 			r.workdays = built.workdays;
 			r.remainingDays = built.remainingDays;
@@ -163,17 +172,119 @@ export function CSVImport({ onImport }: CSVImportProps) {
 	};
 
 	return (
-		<aside className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-100 card-hover">
-			<div className="mb-4">
-				<h3 className="text-xl font-semibold text-gray-800 flex items-center gap-2 mb-2">
-					<span className="text-2xl">📁</span>
-					<span>Import CSV</span>
-				</h3>
-				<p className="text-xs text-gray-500">
-					Upload CSV with columns: Date, Task, Category, HRS, MINS. Dates may repeat and will be grouped.
-				</p>
-			</div>
-			<div className="grid grid-cols-1 gap-3 mt-4">
+		<div>
+			<p className="text-sm text-gray-600 mb-6">
+				Upload CSV with columns: Date, Task, Category, HRS, MINS. Dates may repeat and will be grouped. Enter total
+				required hours and click "Parse & Display" to see results.
+			</p>
+			<div className="grid grid-cols-1 gap-4 mt-4">
+				{/* Shared Business Context Fields */}
+				<div className="bg-violet-50 rounded-lg p-4 border border-violet-200">
+					<h4 className="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
+						<span>📋</span>
+						<span>Business Context (Shared across all modules)</span>
+					</h4>
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+						<div>
+							<label htmlFor="csv-total" className="text-sm font-medium text-gray-700 block mb-1">
+								📝 Total required hours
+							</label>
+							<input
+								id="csv-total"
+								type="text"
+								placeholder="e.g., 160 hrs 0 mins"
+								className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all bg-white"
+								value={totalHours}
+								onChange={(e) => setTotalHours(e.target.value)}
+							/>
+						</div>
+						<div>
+							<label htmlFor="csv-completed" className="text-sm font-medium text-gray-700 block mb-1">
+								✅ Completed hours (auto-filled from CSV)
+							</label>
+							<input
+								id="csv-completed"
+								type="text"
+								placeholder="Will be calculated from CSV"
+								className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all bg-gray-100"
+								value={completedHours}
+								readOnly
+							/>
+						</div>
+						<div>
+							<label htmlFor="csv-rate" className="text-sm font-medium text-gray-700 block mb-1">
+								� Hourly rate (Rs/hr)
+							</label>
+							<input
+								id="csv-rate"
+								type="number"
+								min="0"
+								step="0.01"
+								placeholder="e.g., 500"
+								className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all bg-white"
+								value={hourlyRate}
+								onChange={(e) => setHourlyRate(e.target.value)}
+							/>
+						</div>
+						<div>
+							<label htmlFor="csv-billing-start" className="text-sm font-medium text-gray-700 block mb-1">
+								� Billing start (auto-filled from CSV)
+							</label>
+							<input
+								id="csv-billing-start"
+								type="date"
+								className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all bg-gray-100"
+								value={billingStart}
+								readOnly
+							/>
+						</div>
+						<div>
+							<label htmlFor="csv-billing-end" className="text-sm font-medium text-gray-700 block mb-1">
+								🏁 Billing end (auto-filled from CSV)
+							</label>
+							<input
+								id="csv-billing-end"
+								type="date"
+								className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all bg-gray-100"
+								value={billingEnd}
+								readOnly
+							/>
+						</div>
+					</div>
+
+					{/* Weekend and Today Options */}
+					<div className="mt-4 flex gap-3 sm:gap-4 items-center flex-wrap">
+						<label className="inline-flex items-center gap-2 cursor-pointer group">
+							<input
+								type="checkbox"
+								className="rounded w-4 h-4 text-violet-600 border-gray-300 focus:ring-violet-500 cursor-pointer"
+								checked={skipSunday}
+								onChange={(e) => setSkipSunday(e.target.checked)}
+							/>
+							<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Skip Sundays</span>
+						</label>
+						<label className="inline-flex items-center gap-2 cursor-pointer group">
+							<input
+								type="checkbox"
+								className="rounded w-4 h-4 text-violet-600 border-gray-300 focus:ring-violet-500 cursor-pointer"
+								checked={skipSaturday}
+								onChange={(e) => setSkipSaturday(e.target.checked)}
+							/>
+							<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Skip Saturdays</span>
+						</label>
+						<label className="inline-flex items-center gap-2 cursor-pointer group">
+							<input
+								type="checkbox"
+								className="rounded w-4 h-4 text-violet-600 border-gray-300 focus:ring-violet-500 cursor-pointer"
+								checked={excludeToday}
+								onChange={(e) => setExcludeToday(e.target.checked)}
+							/>
+							<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Exclude today</span>
+						</label>
+					</div>
+				</div>
+
+				{/* CSV Import Section */}
 				<div className="flex gap-2 items-center flex-wrap">
 					<input
 						id="csv-file"
@@ -191,21 +302,15 @@ export function CSVImport({ onImport }: CSVImportProps) {
 						<span>Import CSV</span>
 					</button>
 				</div>
-				<div className="flex gap-2 items-center flex-wrap">
-					<input
-						id="csv-required"
-						placeholder="e.g., 160 hrs 0 mins or 160"
-						className="mt-1 block flex-1 min-w-[200px] rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all"
-						value={requiredHours}
-						onChange={(e) => setRequiredHours(e.target.value)}
-					/>
+
+				<div className="flex justify-end">
 					<button
 						type="button"
 						id="csv-parse-display"
 						onClick={handleParseAndDisplay}
-						className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-1">
-						<span>⚡</span>
+						className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center gap-2">
 						<span>Parse & Display</span>
+						<span>→</span>
 					</button>
 				</div>
 			</div>
@@ -249,6 +354,6 @@ export function CSVImport({ onImport }: CSVImportProps) {
 					</table>
 				</div>
 			)}
-		</aside>
+		</div>
 	);
 }

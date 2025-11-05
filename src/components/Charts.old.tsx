@@ -76,6 +76,7 @@ export function DailyChart({
 	}
 
 	const labels = result.days.map((d) => d.date.toLocaleDateString());
+	// Convert perDay from minutes to hours (perDay is in minutes)
 	const perDayHours = result.perDay / 60;
 	const plannedData = result.days.map((d) => (d.work ? perDayHours : 0));
 	const actualData = result.days.map((d) => {
@@ -438,19 +439,12 @@ export function DailyEarningsChart({ result }: { result: WorkHoursResult | null 
 	return <Bar data={data} options={options} />;
 }
 
-export function Charts({ result, actualsByDate, parsedRows, wakaTimeResult, wakaTimeDailyData }: ChartsProps) {
+export function Charts({ result, actualsByDate, parsedRows, wakaTimeResult, wakaTimeDailyData, activeDataSource }: ChartsProps) {
 	// Determine if we have data to show
 	const hasCalculatorData = result !== null;
 	const hasCSVData = Object.keys(actualsByDate).length > 0 || parsedRows.length > 0;
 	const hasWakaTimeData = wakaTimeResult !== null;
-	const hasWakaTimeDailyData = wakaTimeDailyData && Object.keys(wakaTimeDailyData).length > 0;
 	const hasAnyData = hasCalculatorData || hasCSVData || hasWakaTimeData;
-
-	// For WakaTime, we can show calculator-based charts if result exists
-	const canShowCalculatorCharts = hasCalculatorData;
-	// For daily hours distribution and burn-down, we can use WakaTime daily data
-	const canShowDailyDistribution = hasCSVData || hasWakaTimeDailyData;
-	const canShowBurnDown = hasCalculatorData;
 
 	if (!hasAnyData) {
 		return (
@@ -468,7 +462,7 @@ export function Charts({ result, actualsByDate, parsedRows, wakaTimeResult, waka
 
 	return (
 		<div className="max-w-6xl mx-auto p-6 fade-in">
-			{/* Progress Overview - Works with Calculator or WakaTime (if business context is filled) */}
+			{/* Progress Overview - Calculator & CSV */}
 			<div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 mt-4 border border-gray-100 card-hover">
 				<h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
 					<span className="text-2xl">📊</span>
@@ -476,10 +470,10 @@ export function Charts({ result, actualsByDate, parsedRows, wakaTimeResult, waka
 				</h3>
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 					<div className="bg-violet-50 rounded-lg p-4 h-64 border border-violet-200">
-						{canShowCalculatorCharts ? (
+						{hasCalculatorData ? (
 							<ProgressChart result={result} />
 						) : (
-							<NotSupportedMessage message="Fill Business Context fields and calculate to see progress" />
+							<NotSupportedMessage message="Available with Work Hours Calculator data" />
 						)}
 					</div>
 					<div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
@@ -487,68 +481,60 @@ export function Charts({ result, actualsByDate, parsedRows, wakaTimeResult, waka
 							<span>📅</span>
 							<span>Daily Plan (hours per remaining workday)</span>
 						</div>
-						{canShowCalculatorCharts ? (
+						{hasCalculatorData ? (
 							<DailyChart result={result} actualsByDate={actualsByDate} />
 						) : (
-							<NotSupportedMessage message="Fill Business Context fields and calculate to see daily plan" />
+							<NotSupportedMessage message="Available with Work Hours Calculator data" />
 						)}
 					</div>
 				</div>
 			</div>
 
-			{/* Earnings Overview - Works with any data source if business context is filled */}
-			{canShowCalculatorCharts && result && result.hourlyRate > 0 && (
-				<div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 mt-4 border border-gray-100 card-hover">
-					<h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-						<span className="text-2xl">💰</span>
-						<span>Earnings Overview</span>
-					</h3>
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-						<div className="bg-green-50 rounded-lg p-4 h-64 border border-green-200">
-							<div className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-								<span>💵</span>
-								<span>Earnings Progress</span>
-							</div>
-							<EarningsProgressChart result={result} />
+		{/* Earnings Overview - Calculator only */}
+		{hasCalculatorData && result && result.hourlyRate > 0 && (
+			<div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 mt-4 border border-gray-100 card-hover">
+				<h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+					<span className="text-2xl">💰</span>
+					<span>Earnings Overview</span>
+				</h3>
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<div className="bg-green-50 rounded-lg p-4 h-64 border border-green-200">
+						<div className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+							<span>💵</span>
+							<span>Earnings Progress</span>
 						</div>
-						<div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
-							<div className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-								<span>📈</span>
-								<span>Projected Cumulative Earnings</span>
-							</div>
-							<div className="h-48">
-								<EarningsOverTimeChart result={result} />
-							</div>
-						</div>
+						<EarningsProgressChart result={result} />
 					</div>
-					<div className="mt-6">
-						<h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-							<span>💸</span>
-							<span>Daily Earnings Breakdown</span>
-						</h4>
-						<div className="bg-orange-50 rounded-lg p-4 h-64 border border-orange-200">
-							<DailyEarningsChart result={result} />
+					<div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+						<div className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+							<span>📈</span>
+							<span>Projected Cumulative Earnings</span>
+						</div>
+						<div className="h-48">
+							<EarningsOverTimeChart result={result} />
 						</div>
 					</div>
 				</div>
-			)}
-
-			{/* Burn-down Forecast - Works with any data source if business context is filled */}
-			<div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 mt-4 border border-gray-100 card-hover">
+				<div className="mt-6">
+					<h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+						<span>💸</span>
+						<span>Daily Earnings Breakdown</span>
+					</h4>
+					<div className="bg-orange-50 rounded-lg p-4 h-64 border border-orange-200">
+						<DailyEarningsChart result={result} />
+					</div>
+				</div>
+			</div>
+		)}			<div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 mt-4 border border-gray-100 card-hover">
 				<h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
 					<span className="text-2xl">📉</span>
 					<span>Burn-down Forecast</span>
 				</h3>
 				<div className="h-96 w-full bg-gray-50 rounded-lg p-4 border border-gray-200">
-					{canShowBurnDown ? (
-						<BurnDownChart result={result} actualsByDate={actualsByDate} />
-					) : (
-						<NotSupportedMessage message="Fill Business Context fields and calculate to see burn-down forecast" />
-					)}
+					<BurnDownChart result={result} actualsByDate={actualsByDate} />
 				</div>
 			</div>
 
-			{/* Analytics Section */}
 			<div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 mt-4 border border-gray-100 card-hover">
 				<h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
 					<span className="text-2xl">📈</span>
@@ -561,13 +547,7 @@ export function Charts({ result, actualsByDate, parsedRows, wakaTimeResult, waka
 							<span>Daily Hours Distribution</span>
 						</h4>
 						<div className="bg-blue-50 rounded-lg p-4 h-48 border border-blue-100">
-							{canShowDailyDistribution ? (
-								<HistogramChart
-									actualsByDate={hasWakaTimeDailyData && !hasCSVData ? wakaTimeDailyData! : actualsByDate}
-								/>
-							) : (
-								<NotSupportedMessage message="Available with CSV Import or WakaTime Tracker data" />
-							)}
+							<HistogramChart actualsByDate={actualsByDate} />
 						</div>
 					</div>
 					<div>
@@ -576,115 +556,107 @@ export function Charts({ result, actualsByDate, parsedRows, wakaTimeResult, waka
 							<span>Category Breakdown</span>
 						</h4>
 						<div className="bg-green-50 rounded-lg p-4 h-48 border border-green-100">
-							{parsedRows.length > 0 ? (
-								<CategoryChart parsedRows={parsedRows} />
-							) : (
-								<NotSupportedMessage message="Available with CSV Import data (requires Category column)" />
-							)}
+							<CategoryChart parsedRows={parsedRows} />
 						</div>
 					</div>
 				</div>
 			</div>
 
-			{/* Time Tracking Analytics - Integrated WakaTime Section */}
-			<div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 mt-4 border border-gray-100 card-hover">
-				<h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-					<span className="text-2xl">⏱️</span>
-					<span>Time Tracking Analytics</span>
-				</h3>
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-					<div>
-						<h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-							<span>💻</span>
-							<span>Language Distribution</span>
-						</h4>
-						<div className="bg-purple-50 rounded-lg p-4 h-64 border border-purple-200">
-							{hasWakaTimeData && wakaTimeResult && wakaTimeResult.languages.length > 0 ? (
-								<Pie
-									data={{
-										labels: wakaTimeResult.languages.slice(0, 5).map((l) => l.name),
-										datasets: [
-											{
-												data: wakaTimeResult.languages.slice(0, 5).map((l) => l.hours),
-												backgroundColor: ['#7c3aed', '#8b5cf6', '#a78bfa', '#c4b5fd', '#ddd6fe'],
-											},
-										],
-									}}
-									options={{
-										plugins: { legend: { position: 'bottom' as const } },
-										responsive: true,
-										maintainAspectRatio: true,
-									}}
-								/>
-							) : (
-								<NotSupportedMessage message="Available with WakaTime Tracker data" />
-							)}
-						</div>
-					</div>
-					<div>
-						<h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-							<span>🖥️</span>
-							<span>Editor Usage</span>
-						</h4>
-						<div className="bg-indigo-50 rounded-lg p-4 h-64 border border-indigo-200">
-							{hasWakaTimeData && wakaTimeResult && wakaTimeResult.editors.length > 0 ? (
-								<Doughnut
-									data={{
-										labels: wakaTimeResult.editors.map((e) => e.name),
-										datasets: [
-											{
-												data: wakaTimeResult.editors.map((e) => e.hours),
-												backgroundColor: ['#6366f1', '#818cf8', '#a5b4fc'],
-											},
-										],
-									}}
-									options={{
-										plugins: { legend: { position: 'bottom' as const } },
-										responsive: true,
-										maintainAspectRatio: true,
-									}}
-								/>
-							) : (
-								<NotSupportedMessage message="Available with WakaTime Tracker data" />
-							)}
-						</div>
-					</div>
-				</div>
-				<div className="mt-6">
-					<h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-						<span>📅</span>
-						<span>Daily Time Tracked</span>
-					</h4>
-					<div className="bg-cyan-50 rounded-lg p-4 h-64 border border-cyan-200">
-						{hasWakaTimeData && wakaTimeDailyData && Object.keys(wakaTimeDailyData).length > 0 ? (
-							<Bar
-								data={{
-									labels: Object.keys(wakaTimeDailyData).sort(),
-									datasets: [
-										{
-											label: 'Hours tracked',
-											data: Object.keys(wakaTimeDailyData)
-												.sort()
-												.map((date) => wakaTimeDailyData[date]),
-											backgroundColor: '#06b6d4',
-											borderColor: '#0891b2',
-											borderWidth: 1,
-										},
-									],
-								}}
-								options={{
-									scales: { y: { beginAtZero: true } },
-									responsive: true,
-									maintainAspectRatio: false,
-									plugins: { legend: { position: 'bottom' as const } },
-								}}
-							/>
-						) : (
-							<NotSupportedMessage message="Available with WakaTime Tracker data" />
+			{/* WakaTime Charts */}
+			{wakaTimeResult && wakaTimeDailyData && (
+				<div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 mt-4 border border-gray-100 card-hover">
+					<h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+						<span className="text-2xl">⏱️</span>
+						<span>WakaTime Analytics</span>
+					</h3>
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+						{wakaTimeResult.languages.length > 0 && (
+							<div>
+								<h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+									<span>💻</span>
+									<span>Language Distribution</span>
+								</h4>
+								<div className="bg-purple-50 rounded-lg p-4 h-64 border border-purple-200">
+									<Pie
+										data={{
+											labels: wakaTimeResult.languages.slice(0, 5).map((l) => l.name),
+											datasets: [
+												{
+													data: wakaTimeResult.languages.slice(0, 5).map((l) => l.hours),
+													backgroundColor: ['#7c3aed', '#8b5cf6', '#a78bfa', '#c4b5fd', '#ddd6fe'],
+												},
+											],
+										}}
+										options={{
+											plugins: { legend: { position: 'bottom' as const } },
+											responsive: true,
+											maintainAspectRatio: true,
+										}}
+									/>
+								</div>
+							</div>
+						)}
+						{wakaTimeResult.editors.length > 0 && (
+							<div>
+								<h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+									<span>🖥️</span>
+									<span>Editor Usage</span>
+								</h4>
+								<div className="bg-indigo-50 rounded-lg p-4 h-64 border border-indigo-200">
+									<Doughnut
+										data={{
+											labels: wakaTimeResult.editors.map((e) => e.name),
+											datasets: [
+												{
+													data: wakaTimeResult.editors.map((e) => e.hours),
+													backgroundColor: ['#6366f1', '#818cf8', '#a5b4fc'],
+												},
+											],
+										}}
+										options={{
+											plugins: { legend: { position: 'bottom' as const } },
+											responsive: true,
+											maintainAspectRatio: true,
+										}}
+									/>
+								</div>
+							</div>
 						)}
 					</div>
+					{Object.keys(wakaTimeDailyData).length > 0 && (
+						<div className="mt-6">
+							<h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+								<span>📅</span>
+								<span>Daily WakaTime Hours</span>
+							</h4>
+							<div className="bg-cyan-50 rounded-lg p-4 h-64 border border-cyan-200">
+								<Bar
+									data={{
+										labels: Object.keys(wakaTimeDailyData).sort(),
+										datasets: [
+											{
+												label: 'Hours tracked',
+												data: Object.keys(wakaTimeDailyData)
+													.sort()
+													.map((date) => wakaTimeDailyData[date]),
+												backgroundColor: '#06b6d4',
+												borderColor: '#0891b2',
+												borderWidth: 1,
+											},
+										],
+									}}
+									options={{
+										scales: { y: { beginAtZero: true } },
+										responsive: true,
+										maintainAspectRatio: false,
+										plugins: { legend: { position: 'bottom' as const } },
+									}}
+								/>
+							</div>
+						</div>
+					)}
 				</div>
-			</div>
+			)}
 		</div>
 	);
 }
