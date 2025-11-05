@@ -277,38 +277,59 @@ export function CategoryChart({ parsedRows }: { parsedRows: Record<string, unkno
 
 export function Charts({ result, actualsByDate, parsedRows }: ChartsProps) {
 	return (
-		<div className="max-w-6xl mx-auto p-6">
-			<div className="bg-white rounded-lg shadow p-6 mt-4">
-				<h3 className="text-md font-medium mb-2">Progress</h3>
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<div className="bg-gray-50 rounded p-4 h-64">
+		<div className="max-w-6xl mx-auto p-6 fade-in">
+			<div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 mt-4 border border-gray-100 card-hover">
+				<h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+					<span className="text-2xl">📊</span>
+					<span>Progress Overview</span>
+				</h3>
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<div className="bg-violet-50 rounded-lg p-4 h-64 border border-violet-200">
 						<ProgressChart result={result} />
 					</div>
-					<div className="bg-gray-50 rounded p-4">
-						<div className="text-sm muted mb-2">Daily plan (hours per remaining workday)</div>
+					<div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+						<div className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+							<span>📅</span>
+							<span>Daily Plan (hours per remaining workday)</span>
+						</div>
 						<DailyChart result={result} actualsByDate={actualsByDate} />
 					</div>
 				</div>
 			</div>
 
-			<div className="bg-white rounded-lg shadow p-6 mt-4">
-				<h3 className="text-md font-medium mb-2">Burn-down / Forecast</h3>
-				<div className="h-96 w-full">
+			<div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 mt-4 border border-gray-100 card-hover">
+				<h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+					<span className="text-2xl">📉</span>
+					<span>Burn-down Forecast</span>
+				</h3>
+				<div className="h-96 w-full bg-gray-50 rounded-lg p-4 border border-gray-200">
 					<BurnDownChart result={result} actualsByDate={actualsByDate} />
 				</div>
 			</div>
 
-			<div className="bg-white rounded-lg shadow p-6 mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-				<div>
-					<h4 className="text-sm font-medium mb-2">Actuals histogram (daily hours)</h4>
-					<div className="bg-gray-50 rounded p-4 h-48">
-						<HistogramChart actualsByDate={actualsByDate} />
+			<div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 mt-4 border border-gray-100 card-hover">
+				<h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+					<span className="text-2xl">📈</span>
+					<span>Analytics</span>
+				</h3>
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<div>
+						<h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+							<span>📊</span>
+							<span>Daily Hours Distribution</span>
+						</h4>
+						<div className="bg-blue-50 rounded-lg p-4 h-48 border border-blue-100">
+							<HistogramChart actualsByDate={actualsByDate} />
+						</div>
 					</div>
-				</div>
-				<div>
-					<h4 className="text-sm font-medium mb-2">Category breakdown</h4>
-					<div className="bg-gray-50 rounded p-4 h-48">
-						<CategoryChart parsedRows={parsedRows} />
+					<div>
+						<h4 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+							<span>🏷️</span>
+							<span>Category Breakdown</span>
+						</h4>
+						<div className="bg-green-50 rounded-lg p-4 h-48 border border-green-100">
+							<CategoryChart parsedRows={parsedRows} />
+						</div>
 					</div>
 				</div>
 			</div>

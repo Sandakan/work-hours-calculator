@@ -27,29 +27,39 @@ function App() {
 	};
 
 	return (
-		<div className="bg-gray-50 text-gray-900 min-h-screen">
-			<div className="max-w-full mx-auto p-6">
-				<header className="flex items-start justify-between gap-6 mb-6">
+		<div className="min-h-screen text-gray-900" style={{ background: 'linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%)' }}>
+			<div className="max-w-full mx-auto p-4 sm:p-6 lg:p-8">
+				<header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 fade-in">
 					<div>
-						<h1 className="text-2xl font-semibold">Work Hours & Time Calculator</h1>
-						<p className="muted mt-1">shadcn-like UI with charts and realtime info</p>
+						<h1 className="text-3xl sm:text-4xl font-bold gradient-text">
+							Work Hours & Time Calculator
+						</h1>
+						<p className="text-gray-600 mt-2 text-sm sm:text-base flex items-center gap-2">
+							<span>📊</span>
+							<span>Modern UI with charts and real-time tracking</span>
+						</p>
 					</div>
 					<CurrentDateTime />
 				</header>
 
-				<main className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+				<main className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 fade-in">
 					<WorkHoursCalculator onCalculate={handleCalculate} />
 					<CSVImport onImport={handleCSVImport} />
 				</main>
 
 				<Charts result={result} actualsByDate={actualsByDate} parsedRows={parsedRows} />
 
-				<div className="max-w-6xl mx-auto p-6">
+				<div className="max-w-6xl mx-auto px-4 sm:px-6">
 					<TimeSumCalculator />
 				</div>
 
-				<footer className="mt-6 text-sm muted text-center pb-6">
-					<p>React + Vite + Tailwind CSS. Charts powered by Chart.js.</p>
+				<footer className="mt-8 text-sm text-gray-500 text-center pb-6 fade-in">
+					<p className="flex items-center justify-center gap-2">
+						<span>⚡</span>
+						<span>Built with React + Vite + Tailwind CSS</span>
+						<span>•</span>
+						<span>Charts by Chart.js</span>
+					</p>
 				</footer>
 			</div>
 		</div>

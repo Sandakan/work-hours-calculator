@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { parseCSV } from '../utils/csvUtils';
+import { loadFormState, saveFormState } from '../utils/storage';
 import type { WorkHoursResult } from '../utils/timeUtils';
 import { calcWorkHours, parseTime } from '../utils/timeUtils';
-import { loadFormState, saveFormState } from '../utils/storage';
 
 interface CSVImportProps {
 	onImport: (
@@ -163,33 +163,39 @@ export function CSVImport({ onImport }: CSVImportProps) {
 	};
 
 	return (
-		<aside className="bg-white rounded-lg shadow p-6">
-			<h3 className="text-lg font-medium mb-2">Import CSV (Date, Task, Category, HRS, MINS)</h3>
-			<p className="muted text-sm mb-2">
-				Upload CSV with columns Date, Task, Category, HRS, MINS. Dates may repeat and will be grouped.
-			</p>
-			<div className="grid grid-cols-1 gap-2 mt-3">
+		<aside className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-100 card-hover">
+			<div className="mb-4">
+				<h3 className="text-xl font-semibold text-gray-800 flex items-center gap-2 mb-2">
+					<span className="text-2xl">📁</span>
+					<span>Import CSV</span>
+				</h3>
+				<p className="text-xs text-gray-500">
+					Upload CSV with columns: Date, Task, Category, HRS, MINS. Dates may repeat and will be grouped.
+				</p>
+			</div>
+			<div className="grid grid-cols-1 gap-3 mt-4">
 				<div className="flex gap-2 items-center flex-wrap">
 					<input
 						id="csv-file"
 						type="file"
 						accept="text/csv,.csv"
-						className="text-sm flex-1 min-w-[200px]"
+						className="text-sm flex-1 min-w-[200px] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 file:cursor-pointer cursor-pointer"
 						ref={fileInputRef}
 					/>
 					<button
 						type="button"
 						id="csv-import"
 						onClick={handleFileImport}
-						className="ml-auto bg-green-600 text-white px-3 py-1 rounded">
-						Import CSV
+						className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-1">
+						<span>📤</span>
+						<span>Import CSV</span>
 					</button>
 				</div>
 				<div className="flex gap-2 items-center flex-wrap">
 					<input
 						id="csv-required"
-						placeholder="Required hours (e.g. 160 hrs 0 mins or 160)"
-						className="mt-1 block flex-1 min-w-[200px] rounded-md border px-3 py-2 text-sm"
+						placeholder="e.g., 160 hrs 0 mins or 160"
+						className="mt-1 block flex-1 min-w-[200px] rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all"
 						value={requiredHours}
 						onChange={(e) => setRequiredHours(e.target.value)}
 					/>
@@ -197,35 +203,38 @@ export function CSVImport({ onImport }: CSVImportProps) {
 						type="button"
 						id="csv-parse-display"
 						onClick={handleParseAndDisplay}
-						className="ml-auto bg-blue-600 text-white px-3 py-1 rounded">
-						Parse & Display
+						className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-1">
+						<span>⚡</span>
+						<span>Parse & Display</span>
 					</button>
 				</div>
 			</div>
-			<div id="csv-feedback" className="mt-3 text-sm muted">
-				{feedback}
+			<div id="csv-feedback" className="mt-3 text-xs text-gray-600 bg-gray-50 rounded-lg p-2 border border-gray-200 min-h-8 flex items-center">
+				{feedback || 'No file imported yet'}
 			</div>
 			{tableData.length > 0 && (
-				<div id="csv-table" className="mt-3 overflow-auto max-h-48">
+				<div id="csv-table" className="mt-4 overflow-auto max-h-64 rounded-lg border border-gray-200 bg-white">
 					<table className="min-w-full text-sm">
-						<thead>
+						<thead className="bg-gray-100 sticky top-0">
 							<tr className="text-left">
-								<th>Date</th>
-								<th>Total HRS</th>
-								<th>Details</th>
+								<th className="px-4 py-3 font-semibold text-gray-700">Date</th>
+								<th className="px-4 py-3 font-semibold text-gray-700">Total HRS</th>
+								<th className="px-4 py-3 font-semibold text-gray-700">Details</th>
 							</tr>
 						</thead>
-						<tbody>
-							{tableData.map((row) => (
-								<tr key={row.date}>
-									<td className="py-1">{row.date}</td>
-									<td className="py-1">
+						<tbody className="divide-y divide-gray-200">
+							{tableData.map((row, idx) => (
+								<tr key={row.date} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+									<td className="px-4 py-3 font-medium text-gray-900">{row.date}</td>
+									<td className="px-4 py-3 text-gray-700">
 										{row.hrs} hrs {row.mins} mins
 									</td>
-									<td className="py-1">
+									<td className="px-4 py-3 text-gray-700">
 										{row.details.map((detail, didx) => (
-											<div key={`${row.date}-${didx}`}>
-												<strong>{detail.task}</strong> ({detail.category}) - {detail.hrs}h {detail.mins}m
+											<div key={`${row.date}-${didx}`} className="mb-1 last:mb-0">
+												<strong className="text-gray-900">{detail.task}</strong> 
+												<span className="text-gray-500"> ({detail.category})</span> - 
+												<span className="text-violet-600"> {detail.hrs}h {detail.mins}m</span>
 											</div>
 										))}
 									</td>
