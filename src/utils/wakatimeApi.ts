@@ -6,8 +6,8 @@ import type {
 	WakaTimeSummary,
 } from '../types/wakatime';
 
-// Use Vite proxy in development to avoid CORS issues
-const BASE_URL = import.meta.env.DEV ? '/api/wakatime' : 'https://wakatime.com/api/v1';
+// Use proxy in both development (Vite) and production (Netlify Edge Function)
+const BASE_URL = '/api/wakatime';
 
 /**
  * Creates Basic Auth header for WakaTime API

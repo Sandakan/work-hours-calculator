@@ -241,20 +241,13 @@ export function WakaTimeTracker({
 					</span>
 				</p>
 			</div>
-			{/* CORS Limitation Notice */}
-			<div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
-				<p className="text-xs text-blue-800 flex items-center gap-2">
-					<span>ℹ️</span>
+			{/* Proxy Active Notice */}
+			<div className="mb-4 bg-green-50 border border-green-200 rounded-lg p-3">
+				<p className="text-xs text-green-800 flex items-center gap-2">
+					<span>✅</span>
 					<span>
-						<strong>Note:</strong> WakaTime API may block direct browser requests due to CORS policy. If you encounter
-						errors, this feature requires a backend proxy server. For now, you can view your stats at{' '}
-						<a
-							href="https://wakatime.com/dashboard"
-							target="_blank"
-							rel="noopener noreferrer"
-							className="underline hover:text-blue-900">
-							wakatime.com/dashboard
-						</a>
+						<strong>Proxy Active:</strong> This app uses a server-side proxy to securely communicate with WakaTime API,
+						eliminating CORS restrictions. Your API key is sent only to WakaTime through our secure proxy.
 					</span>
 				</p>
 			</div>
