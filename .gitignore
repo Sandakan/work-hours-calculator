@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 .github/plans/
+
+# Local Netlify folder
+.netlify
