@@ -42,7 +42,7 @@ export default async (request: Request) => {
 						'Content-Type': 'application/json',
 						'Access-Control-Allow-Origin': '*',
 					},
-				}
+				},
 			);
 		}
 
@@ -57,7 +57,7 @@ export default async (request: Request) => {
 						'Content-Type': 'application/json',
 						'Access-Control-Allow-Origin': '*',
 					},
-				}
+				},
 			);
 		}
 
@@ -73,7 +73,7 @@ export default async (request: Request) => {
 						'Access-Control-Allow-Origin': '*',
 						'Retry-After': response.headers.get('Retry-After') || '60',
 					},
-				}
+				},
 			);
 		}
 
@@ -103,7 +103,7 @@ export default async (request: Request) => {
 					'Content-Type': 'application/json',
 					'Access-Control-Allow-Origin': '*',
 				},
-			}
+			},
 		);
 	}
 };

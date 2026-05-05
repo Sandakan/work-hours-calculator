@@ -7,7 +7,7 @@ interface CSVImportProps {
 	onImport: (
 		result: WorkHoursResult,
 		actualsByDate: Record<string, number>,
-		parsedRows: Record<string, unknown>[]
+		parsedRows: Record<string, unknown>[],
 	) => void;
 	totalHours: string;
 	setTotalHours: (value: string) => void;
@@ -92,7 +92,9 @@ export function CSVImport({
 		try {
 			const text = await file.text();
 			setCsvBuffer(text);
-			setFeedback(`CSV loaded (${Math.round(text.length / 1024)} KB). Enter required hours and click Parse & Display.`);
+			setFeedback(
+				`CSV loaded (${Math.round(text.length / 1024)} KB). Enter required hours and click Parse & Display.`,
+			);
 		} catch (e) {
 			setFeedback('CSV load failed: ' + (e instanceof Error ? e.message : String(e)));
 		}
@@ -144,7 +146,16 @@ export function CSVImport({
 			setBillingEnd(endStr);
 
 			const rateValue = parseFloat(hourlyRate) || 0;
-			const r = calcWorkHours(totalHours, completedStr, startStr, endStr, false, false, false, rateValue);
+			const r = calcWorkHours(
+				totalHours,
+				completedStr,
+				startStr,
+				endStr,
+				false,
+				false,
+				false,
+				rateValue,
+			);
 
 			const built = buildDaysBetween(csvStartDate, csvEndDate, false, false);
 			r.days = built.days;
@@ -164,7 +175,7 @@ export function CSVImport({
 			const samplePlanned = planned.slice(0, 8).join(', ');
 			const sampleActuals = actuals.slice(0, 8).join(', ');
 			setFeedback(
-				`Parsed and displayed CSV with required hours. Days:${labels.length} Planned(first):[${samplePlanned}] Actual(first):[${sampleActuals}]`
+				`Parsed and displayed CSV with required hours. Days:${labels.length} Planned(first):[${samplePlanned}] Actual(first):[${sampleActuals}]`,
 			);
 		} catch (e) {
 			setFeedback('Parse & Display failed: ' + (e instanceof Error ? e.message : String(e)));
@@ -174,8 +185,8 @@ export function CSVImport({
 	return (
 		<div>
 			<p className="text-sm text-gray-600 mb-6">
-				Upload CSV with columns: Date, Task, Category, HRS, MINS. Dates may repeat and will be grouped. Enter total
-				required hours and click "Parse & Display" to see results.
+				Upload CSV with columns: Date, Task, Category, HRS, MINS. Dates may repeat and will be
+				grouped. Enter total required hours and click "Parse & Display" to see results.
 			</p>
 			<div className="grid grid-cols-1 gap-4 mt-4">
 				{/* Shared Business Context Fields */}
@@ -199,7 +210,10 @@ export function CSVImport({
 							/>
 						</div>
 						<div>
-							<label htmlFor="csv-completed" className="text-sm font-medium text-gray-700 block mb-1">
+							<label
+								htmlFor="csv-completed"
+								className="text-sm font-medium text-gray-700 block mb-1"
+							>
 								✅ Completed hours (auto-filled from CSV)
 							</label>
 							<input
@@ -227,7 +241,10 @@ export function CSVImport({
 							/>
 						</div>
 						<div>
-							<label htmlFor="csv-billing-start" className="text-sm font-medium text-gray-700 block mb-1">
+							<label
+								htmlFor="csv-billing-start"
+								className="text-sm font-medium text-gray-700 block mb-1"
+							>
 								� Billing start (auto-filled from CSV)
 							</label>
 							<input
@@ -239,7 +256,10 @@ export function CSVImport({
 							/>
 						</div>
 						<div>
-							<label htmlFor="csv-billing-end" className="text-sm font-medium text-gray-700 block mb-1">
+							<label
+								htmlFor="csv-billing-end"
+								className="text-sm font-medium text-gray-700 block mb-1"
+							>
 								🏁 Billing end (auto-filled from CSV)
 							</label>
 							<input
@@ -261,7 +281,9 @@ export function CSVImport({
 								checked={skipSunday}
 								onChange={(e) => setSkipSunday(e.target.checked)}
 							/>
-							<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Skip Sundays</span>
+							<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
+								Skip Sundays
+							</span>
 						</label>
 						<label className="inline-flex items-center gap-2 cursor-pointer group">
 							<input
@@ -270,7 +292,9 @@ export function CSVImport({
 								checked={skipSaturday}
 								onChange={(e) => setSkipSaturday(e.target.checked)}
 							/>
-							<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Skip Saturdays</span>
+							<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
+								Skip Saturdays
+							</span>
 						</label>
 						<label className="inline-flex items-center gap-2 cursor-pointer group">
 							<input
@@ -279,7 +303,9 @@ export function CSVImport({
 								checked={excludeToday}
 								onChange={(e) => setExcludeToday(e.target.checked)}
 							/>
-							<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Exclude today</span>
+							<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
+								Exclude today
+							</span>
 						</label>
 					</div>
 				</div>
@@ -297,7 +323,8 @@ export function CSVImport({
 						type="button"
 						id="csv-import"
 						onClick={handleFileImport}
-						className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-1">
+						className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-1"
+					>
 						<span>📤</span>
 						<span>Import CSV</span>
 					</button>
@@ -308,7 +335,8 @@ export function CSVImport({
 						type="button"
 						id="csv-parse-display"
 						onClick={handleParseAndDisplay}
-						className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center gap-2">
+						className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center gap-2"
+					>
 						<span>Parse & Display</span>
 						<span>→</span>
 					</button>
@@ -316,11 +344,15 @@ export function CSVImport({
 			</div>
 			<div
 				id="csv-feedback"
-				className="mt-3 text-xs text-gray-600 bg-gray-50 rounded-lg p-2 border border-gray-200 min-h-8 flex items-center">
+				className="mt-3 text-xs text-gray-600 bg-gray-50 rounded-lg p-2 border border-gray-200 min-h-8 flex items-center"
+			>
 				{feedback || 'No file imported yet'}
 			</div>
 			{tableData.length > 0 && (
-				<div id="csv-table" className="mt-4 overflow-auto max-h-64 rounded-lg border border-gray-200 bg-white">
+				<div
+					id="csv-table"
+					className="mt-4 overflow-auto max-h-64 rounded-lg border border-gray-200 bg-white"
+				>
 					<table className="min-w-full text-sm">
 						<thead className="bg-gray-100 sticky top-0">
 							<tr className="text-left">

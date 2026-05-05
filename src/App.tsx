@@ -49,7 +49,16 @@ function App() {
 			whSat: skipSaturday,
 			whExcludeToday: excludeToday,
 		});
-	}, [totalHours, completedHours, hourlyRate, billingStart, billingEnd, skipSunday, skipSaturday, excludeToday]);
+	}, [
+		totalHours,
+		completedHours,
+		hourlyRate,
+		billingStart,
+		billingEnd,
+		skipSunday,
+		skipSaturday,
+		excludeToday,
+	]);
 
 	const handleCalculate = useCallback((newResult: WorkHoursResult) => {
 		setResult(newResult);
@@ -65,7 +74,7 @@ function App() {
 		(
 			newResult: WorkHoursResult,
 			newActualsByDate: Record<string, number>,
-			newParsedRows: Record<string, unknown>[]
+			newParsedRows: Record<string, unknown>[],
 		) => {
 			setResult(newResult);
 			setActualsByDate(newActualsByDate);
@@ -75,7 +84,7 @@ function App() {
 			setWakaTimeResult(null);
 			setWakaTimeDailyData({});
 		},
-		[]
+		[],
 	);
 
 	const handleWakaTimeData = useCallback(
@@ -87,39 +96,60 @@ function App() {
 			// Clear CSV-specific data
 			setActualsByDate({});
 			setParsedRows([]);
+		},
+		[],
+	);
 
-			// Automatically calculate work hours using shared business context
+	// Automatically calculate work hours when WakaTime data or shared context changes
+	useEffect(() => {
+		if (
+			activeDataSource === 'wakatime' &&
+			totalHours &&
+			completedHours &&
+			billingStart &&
+			billingEnd
+		) {
 			try {
-				if (totalHours && completedHours && billingStart && billingEnd) {
-					const rate = parseFloat(hourlyRate) || 0;
-					const calculatorResult = calcWorkHours(
-						totalHours,
-						completedHours,
-						billingStart,
-						billingEnd,
-						skipSunday,
-						skipSaturday,
-						excludeToday,
-						rate
-					);
-					setResult(calculatorResult);
-				}
+				const rate = parseFloat(hourlyRate) || 0;
+				const calculatorResult = calcWorkHours(
+					totalHours,
+					completedHours,
+					billingStart,
+					billingEnd,
+					skipSunday,
+					skipSaturday,
+					excludeToday,
+					rate,
+				);
+				setResult(calculatorResult);
 			} catch (error) {
 				console.error('Failed to auto-calculate work hours:', error);
 				setResult(null);
 			}
-		},
-		[totalHours, completedHours, hourlyRate, billingStart, billingEnd, skipSunday, skipSaturday, excludeToday]
-	);
+		}
+	}, [
+		activeDataSource,
+		totalHours,
+		completedHours,
+		billingStart,
+		billingEnd,
+		skipSunday,
+		skipSaturday,
+		excludeToday,
+		hourlyRate,
+	]);
 
 	return (
 		<div
 			className="min-h-screen text-gray-900"
-			style={{ background: 'linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%)' }}>
+			style={{ background: 'linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%)' }}
+		>
 			<div className="max-w-full mx-auto p-4 sm:p-6 lg:p-8">
 				<header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 fade-in">
 					<div>
-						<h1 className="text-3xl sm:text-4xl font-bold gradient-text">Work Hours & Time Calculator</h1>
+						<h1 className="text-3xl sm:text-4xl font-bold gradient-text">
+							Work Hours & Time Calculator
+						</h1>
 						<p className="text-gray-600 mt-2 text-sm sm:text-base flex items-center gap-2">
 							<span>📊</span>
 							<span>Modern UI with charts and real-time tracking</span>
@@ -139,7 +169,8 @@ function App() {
 									activeTab === 'calculator'
 										? 'bg-white text-violet-600 border-b-2 border-violet-600'
 										: 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-								}`}>
+								}`}
+							>
 								<span className="text-lg">🧮</span>
 								<span>Work Hours Calculator</span>
 							</button>
@@ -150,7 +181,8 @@ function App() {
 									activeTab === 'csv'
 										? 'bg-white text-violet-600 border-b-2 border-violet-600'
 										: 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-								}`}>
+								}`}
+							>
 								<span className="text-lg">📁</span>
 								<span>CSV Import</span>
 							</button>
@@ -161,7 +193,8 @@ function App() {
 									activeTab === 'wakatime'
 										? 'bg-white text-violet-600 border-b-2 border-violet-600'
 										: 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-								}`}>
+								}`}
+							>
 								<span className="text-lg">⏱️</span>
 								<span>WakaTime Tracker</span>
 							</button>

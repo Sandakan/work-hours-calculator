@@ -39,12 +39,7 @@ export function parseCSV(csvText: string): {
 
 		if (!dateVal) continue;
 
-		let dObj: Date | null = null;
-		if (dateVal instanceof Date) {
-			dObj = dateVal;
-		} else {
-			dObj = new Date(String(dateVal));
-		}
+		const dObj = dateVal instanceof Date ? dateVal : new Date(String(dateVal));
 
 		if (!dObj || Number.isNaN(dObj.getTime())) continue;
 
@@ -80,7 +75,10 @@ export function parseCSV(csvText: string): {
  * @param projectName - Name of the project
  * @returns CSV string
  */
-export function exportWakaTimeToCSV(dailyData: Record<string, number>, projectName: string): string {
+export function exportWakaTimeToCSV(
+	dailyData: Record<string, number>,
+	projectName: string,
+): string {
 	const headers = ['Date', 'Task', 'Category', 'HRS', 'MINS'];
 	const rows: string[][] = [headers];
 

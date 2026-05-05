@@ -170,7 +170,9 @@ export function WakaTimeTracker({
 		// Check for very large date ranges
 		const daysDiff = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
 		if (daysDiff > 90) {
-			const proceed = confirm('You selected a date range longer than 90 days. This may take a while. Continue?');
+			const proceed = confirm(
+				'You selected a date range longer than 90 days. This may take a while. Continue?',
+			);
 			if (!proceed) return;
 		}
 
@@ -201,7 +203,7 @@ export function WakaTimeTracker({
 					projectName,
 					startDate: billingStart,
 					endDate: billingEnd,
-				}
+				},
 			);
 
 			setResult(data.result);
@@ -229,15 +231,16 @@ export function WakaTimeTracker({
 	return (
 		<div>
 			<p className="text-sm text-gray-600 mb-6">
-				Automatically track hours from WakaTime.com. Enter your API key, select a project and date range, then fetch
-				your tracked time data.
+				Automatically track hours from WakaTime.com. Enter your API key, select a project and date
+				range, then fetch your tracked time data.
 			</p>
 			{/* Security Notice */}
 			<div className="mb-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
 				<p className="text-xs text-yellow-800 flex items-center gap-2">
 					<span>🔒</span>
 					<span>
-						Your API key is stored locally in your browser. It is never sent to any third-party servers except WakaTime.
+						Your API key is stored locally in your browser. It is never sent to any third-party
+						servers except WakaTime.
 					</span>
 				</p>
 			</div>
@@ -246,8 +249,9 @@ export function WakaTimeTracker({
 				<p className="text-xs text-green-800 flex items-center gap-2">
 					<span>✅</span>
 					<span>
-						<strong>Proxy Active:</strong> This app uses a server-side proxy to securely communicate with WakaTime API,
-						eliminating CORS restrictions. Your API key is sent only to WakaTime through our secure proxy.
+						<strong>Proxy Active:</strong> This app uses a server-side proxy to securely communicate
+						with WakaTime API, eliminating CORS restrictions. Your API key is sent only to WakaTime
+						through our secure proxy.
 					</span>
 				</p>
 			</div>
@@ -269,7 +273,8 @@ export function WakaTimeTracker({
 						<button
 							type="button"
 							onClick={() => setShowApiKey(!showApiKey)}
-							className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 text-xs">
+							className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 text-xs"
+						>
 							{showApiKey ? '🙈' : '👁️'}
 						</button>
 					</div>
@@ -277,7 +282,8 @@ export function WakaTimeTracker({
 						type="button"
 						onClick={handleValidateApiKey}
 						disabled={validating || !apiKey}
-						className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all">
+						className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all"
+					>
 						{validating ? 'Testing...' : 'Test'}
 					</button>
 				</div>
@@ -287,7 +293,8 @@ export function WakaTimeTracker({
 						href="https://wakatime.com/settings/account"
 						target="_blank"
 						rel="noopener noreferrer"
-						className="text-violet-600 hover:underline">
+						className="text-violet-600 hover:underline"
+					>
 						WakaTime Settings
 					</a>
 				</p>
@@ -355,7 +362,10 @@ export function WakaTimeTracker({
 						/>
 					</div>
 					<div>
-						<label htmlFor="wt-billing-start" className="text-sm font-medium text-gray-700 block mb-1">
+						<label
+							htmlFor="wt-billing-start"
+							className="text-sm font-medium text-gray-700 block mb-1"
+						>
 							📅 Billing start
 						</label>
 						<input
@@ -367,7 +377,10 @@ export function WakaTimeTracker({
 						/>
 					</div>
 					<div>
-						<label htmlFor="wt-billing-end" className="text-sm font-medium text-gray-700 block mb-1">
+						<label
+							htmlFor="wt-billing-end"
+							className="text-sm font-medium text-gray-700 block mb-1"
+						>
 							🏁 Billing end
 						</label>
 						<input
@@ -389,7 +402,9 @@ export function WakaTimeTracker({
 							checked={skipSunday}
 							onChange={(e) => setSkipSunday(e.target.checked)}
 						/>
-						<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Skip Sundays</span>
+						<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
+							Skip Sundays
+						</span>
 					</label>
 					<label className="inline-flex items-center gap-2 cursor-pointer group">
 						<input
@@ -398,7 +413,9 @@ export function WakaTimeTracker({
 							checked={skipSaturday}
 							onChange={(e) => setSkipSaturday(e.target.checked)}
 						/>
-						<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Skip Saturdays</span>
+						<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
+							Skip Saturdays
+						</span>
 					</label>
 					<label className="inline-flex items-center gap-2 cursor-pointer group">
 						<input
@@ -407,7 +424,9 @@ export function WakaTimeTracker({
 							checked={excludeToday}
 							onChange={(e) => setExcludeToday(e.target.checked)}
 						/>
-						<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Exclude today</span>
+						<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
+							Exclude today
+						</span>
 					</label>
 				</div>
 			</div>
@@ -428,7 +447,8 @@ export function WakaTimeTracker({
 						<div className="flex justify-between">
 							<span className="text-gray-600">Completed hours:</span>
 							<span className="font-medium">
-								{Math.floor(calculatorResult.completed / 60)} hrs {calculatorResult.completed % 60} mins
+								{Math.floor(calculatorResult.completed / 60)} hrs {calculatorResult.completed % 60}{' '}
+								mins
 							</span>
 						</div>
 						<div className="flex justify-between">
@@ -490,7 +510,8 @@ export function WakaTimeTracker({
 					type="button"
 					onClick={handleFetchData}
 					disabled={loading}
-					className="bg-violet-600 hover:bg-violet-700 disabled:bg-gray-400 text-white px-6 py-2.5 rounded-lg font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center gap-2">
+					className="bg-violet-600 hover:bg-violet-700 disabled:bg-gray-400 text-white px-6 py-2.5 rounded-lg font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center gap-2"
+				>
 					{loading ? (
 						<>
 							<span className="animate-spin">⏳</span>
@@ -526,8 +547,8 @@ export function WakaTimeTracker({
 								<strong>Project:</strong> {result.projectName}
 							</p>
 							<p>
-								<strong>Total Time:</strong> {result.digitalTime} ({result.totalHours} hours {result.totalMinutes}{' '}
-								minutes)
+								<strong>Total Time:</strong> {result.digitalTime} ({result.totalHours} hours{' '}
+								{result.totalMinutes} minutes)
 							</p>
 							<p>
 								<strong>Period:</strong> {result.startDate} to {result.endDate}

@@ -55,18 +55,22 @@ export function WorkHoursCalculator({
 				skipSunday,
 				skipSaturday,
 				excludeToday,
-				rateValue
+				rateValue,
 			);
 
 			const out = [];
 			out.push('Total hours: ' + formatMinutes(result.total));
 			out.push('Completed hours: ' + formatMinutes(result.completed));
 			out.push('Remaining hours: ' + formatMinutes(result.remaining));
-			out.push(`Billing period: ${result.billingStart.toDateString()} to ${result.billingEnd.toDateString()}`);
+			out.push(
+				`Billing period: ${result.billingStart.toDateString()} to ${result.billingEnd.toDateString()}`,
+			);
 			out.push('Remaining days: ' + result.remainingDays);
 			if (result.skipped.length) out.push('Skipped days: ' + result.skipped.join(', '));
 			out.push(
-				(result.workdays !== result.remainingDays ? 'Workdays (after exclusions): ' : 'Workdays: ') + result.workdays
+				(result.workdays !== result.remainingDays
+					? 'Workdays (after exclusions): '
+					: 'Workdays: ') + result.workdays,
 			);
 			out.push('Hours per day: ' + formatMinutes(result.perDay));
 
@@ -108,8 +112,8 @@ export function WorkHoursCalculator({
 	return (
 		<div>
 			<p className="text-sm text-gray-600 mb-6">
-				Calculate remaining work hours based on total required, completed hours, and billing period. Configure weekend
-				skipping and see detailed breakdowns.
+				Calculate remaining work hours based on total required, completed hours, and billing period.
+				Configure weekend skipping and see detailed breakdowns.
 			</p>
 
 			{/* Business Context Section (Shared across all modules) */}
@@ -197,7 +201,9 @@ export function WorkHoursCalculator({
 							checked={skipSunday}
 							onChange={(e) => setSkipSunday(e.target.checked)}
 						/>
-						<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Skip Sundays</span>
+						<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
+							Skip Sundays
+						</span>
 					</label>
 					<label className="inline-flex items-center gap-2 cursor-pointer group">
 						<input
@@ -206,7 +212,9 @@ export function WorkHoursCalculator({
 							checked={skipSaturday}
 							onChange={(e) => setSkipSaturday(e.target.checked)}
 						/>
-						<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Skip Saturdays</span>
+						<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
+							Skip Saturdays
+						</span>
 					</label>
 					<label className="inline-flex items-center gap-2 cursor-pointer group">
 						<input
@@ -215,7 +223,9 @@ export function WorkHoursCalculator({
 							checked={excludeToday}
 							onChange={(e) => setExcludeToday(e.target.checked)}
 						/>
-						<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">Exclude today</span>
+						<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
+							Exclude today
+						</span>
 					</label>
 				</div>
 			</div>
@@ -225,7 +235,8 @@ export function WorkHoursCalculator({
 				<button
 					type="button"
 					onClick={handleCalculate}
-					className="bg-violet-600 hover:bg-violet-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center gap-2">
+					className="bg-violet-600 hover:bg-violet-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center gap-2"
+				>
 					<span>Calculate</span>
 					<span>→</span>
 				</button>
@@ -242,7 +253,8 @@ export function WorkHoursCalculator({
 						style={{
 							fontFamily: 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif',
 							fontWeight: '500',
-						}}>
+						}}
+					>
 						{output}
 					</pre>
 				</div>

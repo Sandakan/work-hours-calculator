@@ -38,7 +38,8 @@ export async function validateApiKey(apiKey: string): Promise<boolean> {
 		// Check if it's a CORS error
 		if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
 			throw new Error(
-				'CORS Error: WakaTime API cannot be accessed directly from the browser. You may need to use a proxy server or the WakaTime browser extension instead.'
+				'CORS Error: WakaTime API cannot be accessed directly from the browser. You may need to use a proxy server or the WakaTime browser extension instead.',
+				{ cause: error },
 			);
 		}
 		return false;
@@ -87,14 +88,14 @@ function formatDateForApi(date: string): string {
  */
 export async function fetchProjectSummary(
 	config: WakaTimeConfig,
-	request: WakaTimeProjectRequest
+	request: WakaTimeProjectRequest,
 ): Promise<WakaTimeSummary> {
 	const baseUrl = config.baseUrl || BASE_URL;
 	const startDate = formatDateForApi(request.startDate);
 	const endDate = formatDateForApi(request.endDate);
 
 	const url = `${baseUrl}/users/current/summaries?start=${startDate}&end=${endDate}&project=${encodeURIComponent(
-		request.projectName
+		request.projectName,
 	)}`;
 
 	try {
@@ -129,12 +130,15 @@ export async function fetchProjectSummary(
 			// Check if it's a CORS error
 			if (error.message.includes('Failed to fetch') || error.name === 'TypeError') {
 				throw new Error(
-					'⚠️ CORS Error: WakaTime API blocks direct browser access. This feature requires a backend proxy server to work properly. For now, please use the WakaTime dashboard directly at wakatime.com'
+					'⚠️ CORS Error: WakaTime API blocks direct browser access. This feature requires a backend proxy server to work properly. For now, please use the WakaTime dashboard directly at wakatime.com',
+					{ cause: error },
 				);
 			}
 			throw error;
 		}
-		throw new Error('Failed to fetch WakaTime data. Please check your connection.');
+		throw new Error('Failed to fetch WakaTime data. Please check your connection.', {
+			cause: error,
+		});
 	}
 }
 
@@ -171,7 +175,9 @@ export function calculateDailyBreakdown(data: WakaTimeSummary): Record<string, n
 /**
  * Aggregates language statistics across all days
  */
-function aggregateLanguages(data: WakaTimeSummary): Array<{ name: string; hours: number; percent: number }> {
+function aggregateLanguages(
+	data: WakaTimeSummary,
+): Array<{ name: string; hours: number; percent: number }> {
 	const languageMap = new Map<string, number>();
 	let totalSeconds = 0;
 
@@ -204,7 +210,9 @@ function aggregateLanguages(data: WakaTimeSummary): Array<{ name: string; hours:
 /**
  * Aggregates editor statistics across all days
  */
-function aggregateEditors(data: WakaTimeSummary): Array<{ name: string; hours: number; percent: number }> {
+function aggregateEditors(
+	data: WakaTimeSummary,
+): Array<{ name: string; hours: number; percent: number }> {
 	const editorMap = new Map<string, number>();
 	let totalSeconds = 0;
 
@@ -236,7 +244,9 @@ function aggregateEditors(data: WakaTimeSummary): Array<{ name: string; hours: n
 /**
  * Aggregates operating system statistics across all days
  */
-function aggregateOperatingSystems(data: WakaTimeSummary): Array<{ name: string; hours: number; percent: number }> {
+function aggregateOperatingSystems(
+	data: WakaTimeSummary,
+): Array<{ name: string; hours: number; percent: number }> {
 	const osMap = new Map<string, number>();
 	let totalSeconds = 0;
 
@@ -268,7 +278,9 @@ function aggregateOperatingSystems(data: WakaTimeSummary): Array<{ name: string;
 /**
  * Finds the most productive day in the dataset
  */
-function findMostProductiveDay(dailyData: Record<string, number>): { date: string; hours: number } | null {
+function findMostProductiveDay(
+	dailyData: Record<string, number>,
+): { date: string; hours: number } | null {
 	const entries = Object.entries(dailyData);
 	if (entries.length === 0) return null;
 
@@ -339,7 +351,7 @@ export function parseWakaTimeResponse(data: WakaTimeSummary, projectName: string
  */
 export async function getProjectData(
 	config: WakaTimeConfig,
-	request: WakaTimeProjectRequest
+	request: WakaTimeProjectRequest,
 ): Promise<{ result: WakaTimeResult; dailyData: Record<string, number> }> {
 	const summary = await fetchProjectSummary(config, request);
 	const result = parseWakaTimeResponse(summary, request.projectName);

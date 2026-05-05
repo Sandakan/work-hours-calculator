@@ -10,7 +10,7 @@ export function TimeSumCalculator() {
 29 hrs 44 mins
 41 hrs 1 min
 48 hrs 13 min
-17 hrs 43 min`
+17 hrs 43 min`,
 	);
 	const [output, setOutput] = useState(savedState.tsOutput || 'Total time will appear here');
 
@@ -35,7 +35,9 @@ export function TimeSumCalculator() {
 					<span className="text-2xl">⏱️</span>
 					<span>Time Sum Calculator</span>
 				</h3>
-				<p className="text-xs text-gray-500 mt-1">Paste time strings (one per line) in the format "HH hrs MM mins".</p>
+				<p className="text-xs text-gray-500 mt-1">
+					Paste time strings (one per line) in the format "HH hrs MM mins".
+				</p>
 			</div>
 			<textarea
 				id="ts-input"
@@ -50,7 +52,8 @@ export function TimeSumCalculator() {
 					type="button"
 					id="ts-calc"
 					onClick={handleSumTimes}
-					className="bg-gray-800 hover:bg-gray-900 text-white px-6 py-2.5 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2">
+					className="bg-gray-800 hover:bg-gray-900 text-white px-6 py-2.5 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2"
+				>
 					<span>➕</span>
 					<span>Sum times</span>
 				</button>
@@ -58,7 +61,11 @@ export function TimeSumCalculator() {
 			<pre
 				id="ts-output"
 				className="mt-4 text-base bg-white p-4 rounded-lg text-gray-800 border-2 border-violet-300 shadow-sm leading-relaxed"
-				style={{ fontFamily: 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif', fontWeight: '600' }}>
+				style={{
+					fontFamily: 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif',
+					fontWeight: '600',
+				}}
+			>
 				{output}
 			</pre>
 		</section>

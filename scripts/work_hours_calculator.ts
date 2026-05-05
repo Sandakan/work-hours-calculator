@@ -6,7 +6,9 @@ function parseTime(timeString: string): number {
 	const match = timeString.match(regex);
 
 	if (!match) {
-		throw new Error(`Invalid time format: ${timeString}. Expected format is "HH hrs MM mins", "HH hrs", or "MM mins"`);
+		throw new Error(
+			`Invalid time format: ${timeString}. Expected format is "HH hrs MM mins", "HH hrs", or "MM mins"`,
+		);
 	}
 
 	const hours = match[1] ? parseInt(match[1], 10) : 0;
@@ -33,7 +35,7 @@ function calculateWorkHours(
 	daysRemaining: number,
 	skipSunday: boolean,
 	skipSaturday: boolean,
-	excludeToday: boolean
+	excludeToday: boolean,
 ): void {
 	const remainingHours = totalHours - completedHours;
 
@@ -67,7 +69,7 @@ function calculateWorkHours(
 		console.log(
 			`Workdays (excluding${skipSunday ? ' Sundays' : ''}${skipSunday && skipSaturday ? ' and' : ''}${
 				skipSaturday ? ' Saturdays' : ''
-			}): ${workdays}`
+			}): ${workdays}`,
 		);
 		console.log(`Skipped ${skippedLog.length} days due to exclusions.`);
 		if (skippedLog.length > 0) {
@@ -94,7 +96,7 @@ try {
 } catch (e) {
 	console.error(e);
 	console.error(
-		'  Example: deno run calculate_work_hours.ts --totalHours="8 hrs 30 mins" --completedHours="2 hrs 15 mins" [--daysRemaining=18] [--skipSunday=true] [--skipSaturday=true] [--excludeToday=true]'
+		'  Example: deno run calculate_work_hours.ts --totalHours="8 hrs 30 mins" --completedHours="2 hrs 15 mins" [--daysRemaining=18] [--skipSunday=true] [--skipSaturday=true] [--excludeToday=true]',
 	);
 	Deno.exit(1);
 }
@@ -114,10 +116,17 @@ if (args.daysRemaining) {
 if (isNaN(totalHours) || isNaN(completedHours)) {
 	console.error('Error: Please provide valid values for totalHours and completedHours.');
 	console.error(
-		'  Example: deno run calculate_work_hours.ts --totalHours="8 hrs 30 mins" --completedHours="2 hrs 15 mins" [--daysRemaining=18] [--skipSunday=true] [--skipSaturday=true] [--excludeToday=true]'
+		'  Example: deno run calculate_work_hours.ts --totalHours="8 hrs 30 mins" --completedHours="2 hrs 15 mins" [--daysRemaining=18] [--skipSunday=true] [--skipSaturday=true] [--excludeToday=true]',
 	);
 	console.error('  If daysRemaining is not provided, it will be calculated automatically.');
 	Deno.exit(1);
 } else {
-	calculateWorkHours(totalHours, completedHours, daysRemaining, args.skipSunday, args.skipSaturday, args.excludeToday);
+	calculateWorkHours(
+		totalHours,
+		completedHours,
+		daysRemaining,
+		args.skipSunday,
+		args.skipSaturday,
+		args.excludeToday,
+	);
 }

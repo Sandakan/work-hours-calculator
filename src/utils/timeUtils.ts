@@ -72,7 +72,7 @@ export function calcWorkHours(
 	skipSun: boolean,
 	skipSat: boolean,
 	excludeToday: boolean,
-	hourlyRate = 0
+	hourlyRate = 0,
 ): WorkHoursResult {
 	const total = parseTime(totalStr);
 	const completed = parseTime(completedStr);
@@ -150,7 +150,7 @@ export function sumTimeStrings(text: string): number {
  */
 export function mergeWakaTimeWithManual(
 	wakaTimeData: Record<string, number>,
-	manualData: Record<string, number>
+	manualData: Record<string, number>,
 ): Record<string, { manual: number; wakatime: number; difference: number }> {
 	const merged: Record<string, { manual: number; wakatime: number; difference: number }> = {};
 
@@ -180,7 +180,7 @@ export function mergeWakaTimeWithManual(
  */
 export function calculateDiscrepancy(
 	manual: number,
-	wakatime: number
+	wakatime: number,
 ): { percentage: number; status: 'over' | 'under' | 'match' } {
 	if (manual === 0 && wakatime === 0) {
 		return { percentage: 0, status: 'match' };
@@ -193,14 +193,7 @@ export function calculateDiscrepancy(
 	const difference = wakatime - manual;
 	const percentage = (Math.abs(difference) / manual) * 100;
 
-	let status: 'over' | 'under' | 'match' = 'match';
-	if (percentage < 5) {
-		status = 'match';
-	} else if (difference > 0) {
-		status = 'over';
-	} else {
-		status = 'under';
-	}
+	const status = percentage < 5 ? 'match' : difference > 0 ? 'over' : 'under';
 
 	return { percentage, status };
 }

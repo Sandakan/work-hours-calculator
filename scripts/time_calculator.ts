@@ -61,7 +61,8 @@ function formatTime(totalMinutes: number): string {
  */
 function extractTimeStrings(text: string): string[] {
 	const timeRegex1 = /(\d+ hrs \d+ mins)/g;
-	const timeRegex2 = /Start: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}), End: (\d{4}-\d{2}-\d{2} \d{2}:\d{2})/g;
+	const timeRegex2 =
+		/Start: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}), End: (\d{4}-\d{2}-\d{2} \d{2}:\d{2})/g;
 	let match;
 	const timeStrings: string[] = [];
 	while ((match = timeRegex1.exec(text)) !== null) {

@@ -40,11 +40,11 @@ This is a complete React rewrite of the Work Hours Calculator, transforming the 
 1. **Progress Chart** - Donut chart showing completed vs. remaining hours
 2. **Daily Plan Chart** - Bar chart with actual hours overlay
 3. **Burn-down Chart** - Line chart tracking planned vs. actual progress
-3. **Actuals Histogram** - Distribution of daily work hours
-4. **Category Breakdown** - Pie chart by category
-5. **WakaTime Language Distribution** - Pie chart showing time by programming language
-6. **WakaTime Editor Usage** - Donut chart showing time by editor/IDE
-7. **Daily WakaTime Hours** - Bar chart of hours tracked per day
+4. **Actuals Histogram** - Distribution of daily work hours
+5. **Category Breakdown** - Pie chart by category
+6. **WakaTime Language Distribution** - Pie chart showing time by programming language
+7. **WakaTime Editor Usage** - Donut chart showing time by editor/IDE
+8. **Daily WakaTime Hours** - Bar chart of hours tracked per day
 
 ### 🔢 Time Sum Calculator
 
@@ -65,15 +65,15 @@ This is a complete React rewrite of the Work Hours Calculator, transforming the 
 
 ## Tech Stack
 
-| Technology | Purpose | Version |
-|------------|---------|---------|
-| React | UI Framework | 19.1.1 |
-| TypeScript | Type Safety | ~5.9.3 |
-| Vite | Build Tool | 7.1.14+ |
-| Tailwind CSS | Styling | Latest |
-| Chart.js | Data Visualization | 4.4.0+ |
-| react-chartjs-2 | React Chart Integration | Latest |
-| PapaParse | CSV Processing | 5.3.2+ |
+| Technology      | Purpose                 | Version |
+| --------------- | ----------------------- | ------- |
+| React           | UI Framework            | 19.1.1  |
+| TypeScript      | Type Safety             | ~5.9.3  |
+| Vite            | Build Tool              | 7.1.14+ |
+| Tailwind CSS    | Styling                 | Latest  |
+| Chart.js        | Data Visualization      | 4.4.0+  |
+| react-chartjs-2 | React Chart Integration | Latest  |
+| PapaParse       | CSV Processing          | 5.3.2+  |
 
 ## Project Structure
 
@@ -286,16 +286,16 @@ All components and utilities are fully typed with TypeScript. Key interfaces:
 
 ```typescript
 interface WorkHoursResult {
-  total: number
-  completed: number
-  remaining: number
-  billingStart: Date
-  billingEnd: Date
-  remainingDays: number
-  workdays: number
-  perDay: number
-  skipped: string[]
-  days: Array<{ date: Date; work: boolean }>
+	total: number;
+	completed: number;
+	remaining: number;
+	billingStart: Date;
+	billingEnd: Date;
+	remainingDays: number;
+	workdays: number;
+	perDay: number;
+	skipped: string[];
+	days: Array<{ date: Date; work: boolean }>;
 }
 ```
 

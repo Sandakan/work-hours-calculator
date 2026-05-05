@@ -6,7 +6,9 @@ function parseTime(timeString: string): number {
 	const match = timeString.match(regex);
 
 	if (!match) {
-		throw new Error(`Invalid time format: ${timeString}. Expected format is "HH hrs MM mins", "HH hrs", or "MM mins"`);
+		throw new Error(
+			`Invalid time format: ${timeString}. Expected format is "HH hrs MM mins", "HH hrs", or "MM mins"`,
+		);
 	}
 
 	const hours = match[1] ? parseInt(match[1], 10) : 0;
@@ -34,7 +36,7 @@ function calculateWorkHours(
 	billingEnd: Date,
 	skipSunday: boolean,
 	skipSaturday: boolean,
-	excludeToday: boolean
+	excludeToday: boolean,
 ): void {
 	const remainingHours = totalHours - completedHours;
 	const skippedLog: string[] = [];
@@ -79,7 +81,7 @@ function calculateWorkHours(
 		console.log(
 			`Workdays (excluding${skipSunday ? ' Sundays' : ''}${skipSunday && skipSaturday ? ' and' : ''}${
 				skipSaturday ? ' Saturdays' : ''
-			}): ${workdays}`
+			}): ${workdays}`,
 		);
 		console.log(`Skipped ${skippedLog.length} days due to exclusions.`);
 		if (skippedLog.length > 0) {
@@ -94,7 +96,7 @@ function calculateWorkHours(
 
 function printHelp() {
 	console.log(
-		`Usage: deno run work_hours_cli.ts --totalHours="8 hrs 30 mins" --completedHours="2 hrs 15 mins" --billingStart=YYYY-MM-DD --billingEnd=YYYY-MM-DD [--skipSunday] [--skipSaturday] [--excludeToday]`
+		`Usage: deno run work_hours_cli.ts --totalHours="8 hrs 30 mins" --completedHours="2 hrs 15 mins" --billingStart=YYYY-MM-DD --billingEnd=YYYY-MM-DD [--skipSunday] [--skipSaturday] [--excludeToday]`,
 	);
 	console.log('  --totalHours        Total required hours (e.g., "160 hrs 0 mins")');
 	console.log('  --completedHours    Completed hours (e.g., "130 hrs 40 mins")');
@@ -137,7 +139,15 @@ function main() {
 			Deno.exit(1);
 		}
 
-		calculateWorkHours(totalHours, completedHours, billingStart, billingEnd, skipSunday, skipSaturday, excludeToday);
+		calculateWorkHours(
+			totalHours,
+			completedHours,
+			billingStart,
+			billingEnd,
+			skipSunday,
+			skipSaturday,
+			excludeToday,
+		);
 	} catch (e) {
 		console.error(e);
 		printHelp();

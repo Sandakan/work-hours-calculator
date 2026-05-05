@@ -14,7 +14,17 @@ import { Bar, Doughnut, Line, Pie } from 'react-chartjs-2';
 import type { WakaTimeResult } from '../types/wakatime';
 import type { WorkHoursResult } from '../utils/timeUtils';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend);
+ChartJS.register(
+	CategoryScale,
+	LinearScale,
+	PointElement,
+	LineElement,
+	BarElement,
+	ArcElement,
+	Title,
+	Tooltip,
+	Legend,
+);
 
 type DataSource = 'calculator' | 'csv' | 'wakatime' | null;
 
@@ -438,7 +448,13 @@ export function DailyEarningsChart({ result }: { result: WorkHoursResult | null 
 	return <Bar data={data} options={options} />;
 }
 
-export function Charts({ result, actualsByDate, parsedRows, wakaTimeResult, wakaTimeDailyData }: ChartsProps) {
+export function Charts({
+	result,
+	actualsByDate,
+	parsedRows,
+	wakaTimeResult,
+	wakaTimeDailyData,
+}: ChartsProps) {
 	// Determine if we have data to show
 	const hasCalculatorData = result !== null;
 	const hasCSVData = Object.keys(actualsByDate).length > 0 || parsedRows.length > 0;
@@ -563,7 +579,9 @@ export function Charts({ result, actualsByDate, parsedRows, wakaTimeResult, waka
 						<div className="bg-blue-50 rounded-lg p-4 h-48 border border-blue-100">
 							{canShowDailyDistribution ? (
 								<HistogramChart
-									actualsByDate={hasWakaTimeDailyData && !hasCSVData ? wakaTimeDailyData! : actualsByDate}
+									actualsByDate={
+										hasWakaTimeDailyData && !hasCSVData ? wakaTimeDailyData! : actualsByDate
+									}
 								/>
 							) : (
 								<NotSupportedMessage message="Available with CSV Import or WakaTime Tracker data" />
