@@ -1,6 +1,13 @@
 {
-  "allowScripts": {
-    "allow": [],
-    "deny": ["npm:@parcel/watcher@2.5.6", "npm:esbuild@0.27.3", "npm:fsevents@2.3.3", "npm:netlify-cli@26.0.1", "npm:sharp@0.34.5", "npm:unix-dgram@2.0.7"]
-  }
+	"allowScripts": {
+		"allow": [],
+		"deny": [
+			"npm:@parcel/watcher@2.5.6",
+			"npm:esbuild@0.27.3",
+			"npm:fsevents@2.3.3",
+			"npm:netlify-cli@26.0.1",
+			"npm:sharp@0.34.5",
+			"npm:unix-dgram@2.0.7"
+		]
+	}
 }

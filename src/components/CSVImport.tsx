@@ -1,4 +1,17 @@
 import { useRef, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from '@/components/ui/table';
 import { parseCSV } from '../utils/csvUtils';
 import type { WorkHoursResult } from '../utils/timeUtils';
 import { calcWorkHours } from '../utils/timeUtils';
@@ -183,208 +196,191 @@ export function CSVImport({
 	};
 
 	return (
-		<div>
-			<p className="text-sm text-gray-600 mb-6">
+		<div className="flex flex-col gap-6">
+			<p className="text-sm text-muted-foreground">
 				Upload CSV with columns: Date, Task, Category, HRS, MINS. Dates may repeat and will be
 				grouped. Enter total required hours and click "Parse & Display" to see results.
 			</p>
-			<div className="grid grid-cols-1 gap-4 mt-4">
-				{/* Shared Business Context Fields */}
-				<div className="bg-violet-50 rounded-lg p-4 border border-violet-200">
-					<h4 className="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
-						<span>📋</span>
-						<span>Business Context (Shared across all modules)</span>
-					</h4>
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-						<div>
-							<label htmlFor="csv-total" className="text-sm font-medium text-gray-700 block mb-1">
-								📝 Total required hours
-							</label>
-							<input
-								id="csv-total"
-								type="text"
-								placeholder="e.g., 160 hrs 0 mins"
-								className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all bg-white"
-								value={totalHours}
-								onChange={(e) => setTotalHours(e.target.value)}
-							/>
-						</div>
-						<div>
-							<label
-								htmlFor="csv-completed"
-								className="text-sm font-medium text-gray-700 block mb-1"
-							>
-								✅ Completed hours (auto-filled from CSV)
-							</label>
-							<input
-								id="csv-completed"
-								type="text"
-								placeholder="Will be calculated from CSV"
-								className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all bg-gray-100"
-								value={completedHours}
-								readOnly
-							/>
-						</div>
-						<div>
-							<label htmlFor="csv-rate" className="text-sm font-medium text-gray-700 block mb-1">
-								� Hourly rate (Rs/hr)
-							</label>
-							<input
-								id="csv-rate"
-								type="number"
-								min="0"
-								step="0.01"
-								placeholder="e.g., 500"
-								className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all bg-white"
-								value={hourlyRate}
-								onChange={(e) => setHourlyRate(e.target.value)}
-							/>
-						</div>
-						<div>
-							<label
-								htmlFor="csv-billing-start"
-								className="text-sm font-medium text-gray-700 block mb-1"
-							>
-								� Billing start (auto-filled from CSV)
-							</label>
-							<input
-								id="csv-billing-start"
-								type="date"
-								className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all bg-gray-100"
-								value={billingStart}
-								readOnly
-							/>
-						</div>
-						<div>
-							<label
-								htmlFor="csv-billing-end"
-								className="text-sm font-medium text-gray-700 block mb-1"
-							>
-								🏁 Billing end (auto-filled from CSV)
-							</label>
-							<input
-								id="csv-billing-end"
-								type="date"
-								className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all bg-gray-100"
-								value={billingEnd}
-								readOnly
-							/>
-						</div>
-					</div>
 
-					{/* Weekend and Today Options */}
-					<div className="mt-4 flex gap-3 sm:gap-4 items-center flex-wrap">
-						<label className="inline-flex items-center gap-2 cursor-pointer group">
-							<input
-								type="checkbox"
-								className="rounded w-4 h-4 text-violet-600 border-gray-300 focus:ring-violet-500 cursor-pointer"
-								checked={skipSunday}
-								onChange={(e) => setSkipSunday(e.target.checked)}
-							/>
-							<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
-								Skip Sundays
-							</span>
-						</label>
-						<label className="inline-flex items-center gap-2 cursor-pointer group">
-							<input
-								type="checkbox"
-								className="rounded w-4 h-4 text-violet-600 border-gray-300 focus:ring-violet-500 cursor-pointer"
-								checked={skipSaturday}
-								onChange={(e) => setSkipSaturday(e.target.checked)}
-							/>
-							<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
-								Skip Saturdays
-							</span>
-						</label>
-						<label className="inline-flex items-center gap-2 cursor-pointer group">
-							<input
-								type="checkbox"
-								className="rounded w-4 h-4 text-violet-600 border-gray-300 focus:ring-violet-500 cursor-pointer"
-								checked={excludeToday}
-								onChange={(e) => setExcludeToday(e.target.checked)}
-							/>
-							<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
-								Exclude today
-							</span>
-						</label>
-					</div>
-				</div>
+			<div className="flex flex-col gap-4">
+				{/* Shared Business Context Fields */}
+				<Card className="bg-muted/30 border-dashed">
+					<CardHeader className="pb-3">
+						<CardTitle className="text-sm font-semibold flex items-center gap-2">
+							<span>📋</span>
+							<span>Business Context (Shared)</span>
+						</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<FieldGroup>
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+								<Field>
+									<FieldLabel htmlFor="csv-total">📝 Total required hours</FieldLabel>
+									<Input
+										id="csv-total"
+										type="text"
+										placeholder="e.g., 160 hrs 0 mins"
+										value={totalHours}
+										onChange={(e) => setTotalHours(e.target.value)}
+									/>
+								</Field>
+								<Field>
+									<FieldLabel htmlFor="csv-completed">✅ Completed (auto-filled)</FieldLabel>
+									<Input
+										id="csv-completed"
+										type="text"
+										value={completedHours}
+										readOnly
+										className="bg-muted"
+									/>
+								</Field>
+								<Field>
+									<FieldLabel htmlFor="csv-rate">💰 Hourly rate (Rs/hr)</FieldLabel>
+									<Input
+										id="csv-rate"
+										type="number"
+										min="0"
+										step="0.01"
+										placeholder="e.g., 500"
+										value={hourlyRate}
+										onChange={(e) => setHourlyRate(e.target.value)}
+									/>
+								</Field>
+								<div className="grid grid-cols-2 gap-4">
+									<Field>
+										<FieldLabel htmlFor="csv-billing-start">📅 Start</FieldLabel>
+										<Input
+											id="csv-billing-start"
+											type="date"
+											value={billingStart}
+											readOnly
+											className="bg-muted"
+										/>
+									</Field>
+									<Field>
+										<FieldLabel htmlFor="csv-billing-end">🏁 End</FieldLabel>
+										<Input
+											id="csv-billing-end"
+											type="date"
+											value={billingEnd}
+											readOnly
+											className="bg-muted"
+										/>
+									</Field>
+								</div>
+							</div>
+
+							{/* Weekend and Today Options */}
+							<div className="flex gap-4 items-center flex-wrap pt-2">
+								<Field orientation="horizontal" className="w-auto">
+									<Checkbox
+										id="csv-skip-sun"
+										checked={skipSunday}
+										onCheckedChange={(v) => setSkipSunday(!!v)}
+									/>
+									<FieldLabel htmlFor="csv-skip-sun" className="text-sm font-normal">
+										Skip Sundays
+									</FieldLabel>
+								</Field>
+								<Field orientation="horizontal" className="w-auto">
+									<Checkbox
+										id="csv-skip-sat"
+										checked={skipSaturday}
+										onCheckedChange={(v) => setSkipSaturday(!!v)}
+									/>
+									<FieldLabel htmlFor="csv-skip-sat" className="text-sm font-normal">
+										Skip Saturdays
+									</FieldLabel>
+								</Field>
+								<Field orientation="horizontal" className="w-auto">
+									<Checkbox
+										id="csv-ex-today"
+										checked={excludeToday}
+										onCheckedChange={(v) => setExcludeToday(!!v)}
+									/>
+									<FieldLabel htmlFor="csv-ex-today" className="text-sm font-normal">
+										Exclude today
+									</FieldLabel>
+								</Field>
+							</div>
+						</FieldGroup>
+					</CardContent>
+				</Card>
 
 				{/* CSV Import Section */}
-				<div className="flex gap-2 items-center flex-wrap">
-					<input
+				<div className="flex gap-4 items-center flex-wrap">
+					<Input
 						id="csv-file"
 						type="file"
 						accept="text/csv,.csv"
-						className="text-sm flex-1 min-w-[200px] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 file:cursor-pointer cursor-pointer"
+						className="flex-1 min-w-50"
 						ref={fileInputRef}
 					/>
-					<button
-						type="button"
-						id="csv-import"
+					<Button
+						variant="outline"
 						onClick={handleFileImport}
-						className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-1"
+						className="bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-700 border-emerald-600/20"
 					>
-						<span>📤</span>
-						<span>Import CSV</span>
-					</button>
+						📤 Import CSV
+					</Button>
 				</div>
 
 				<div className="flex justify-end">
-					<button
-						type="button"
-						id="csv-parse-display"
-						onClick={handleParseAndDisplay}
-						className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center gap-2"
-					>
-						<span>Parse & Display</span>
-						<span>→</span>
-					</button>
+					<Button onClick={handleParseAndDisplay} size="lg" className="w-full sm:w-auto">
+						Parse & Display
+						<span className="ml-2">→</span>
+					</Button>
 				</div>
 			</div>
-			<div
-				id="csv-feedback"
-				className="mt-3 text-xs text-gray-600 bg-gray-50 rounded-lg p-2 border border-gray-200 min-h-8 flex items-center"
-			>
+
+			<div className="text-xs text-muted-foreground bg-muted/50 rounded-lg p-3 border border-dashed min-h-10 flex items-center">
 				{feedback || 'No file imported yet'}
 			</div>
+
 			{tableData.length > 0 && (
-				<div
-					id="csv-table"
-					className="mt-4 overflow-auto max-h-64 rounded-lg border border-gray-200 bg-white"
-				>
-					<table className="min-w-full text-sm">
-						<thead className="bg-gray-100 sticky top-0">
-							<tr className="text-left">
-								<th className="px-4 py-3 font-semibold text-gray-700">Date</th>
-								<th className="px-4 py-3 font-semibold text-gray-700">Total HRS</th>
-								<th className="px-4 py-3 font-semibold text-gray-700">Details</th>
-							</tr>
-						</thead>
-						<tbody className="divide-y divide-gray-200">
-							{tableData.map((row, idx) => (
-								<tr key={row.date} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-									<td className="px-4 py-3 font-medium text-gray-900">{row.date}</td>
-									<td className="px-4 py-3 text-gray-700">
-										{row.hrs} hrs {row.mins} mins
-									</td>
-									<td className="px-4 py-3 text-gray-700">
-										{row.details.map((detail, didx) => (
-											<div key={`${row.date}-${didx}`} className="mb-1 last:mb-0">
-												<strong className="text-gray-900">{detail.task}</strong>
-												<span className="text-gray-500"> ({detail.category})</span> -
-												<span className="text-violet-600">
-													{' '}
-													{detail.hrs}h {detail.mins}m
-												</span>
+				<Card>
+					<div className="overflow-auto max-h-96">
+						<Table>
+							<TableHeader className="sticky top-0 bg-background shadow-sm">
+								<TableRow>
+									<TableHead className="w-32">Date</TableHead>
+									<TableHead className="w-32">Total HRS</TableHead>
+									<TableHead>Details</TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{tableData.map((row) => (
+									<TableRow key={row.date}>
+										<TableCell className="font-medium">{row.date}</TableCell>
+										<TableCell>
+											{row.hrs} hrs {row.mins} mins
+										</TableCell>
+										<TableCell>
+											<div className="flex flex-col gap-2">
+												{row.details.map((detail, didx) => (
+													<div
+														key={`${row.date}-${didx}`}
+														className="text-sm border-l-2 border-primary/20 pl-3 py-1"
+													>
+														<div className="flex items-center gap-2">
+															<span className="font-semibold">{detail.task}</span>
+															<span className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+																{detail.category}
+															</span>
+														</div>
+														<div className="text-xs text-primary font-medium mt-1">
+															{detail.hrs}h {detail.mins}m
+														</div>
+													</div>
+												))}
 											</div>
-										))}
-									</td>
-								</tr>
-							))}
-						</tbody>
-					</table>
-				</div>
+										</TableCell>
+									</TableRow>
+								))}
+							</TableBody>
+						</Table>
+					</div>
+				</Card>
 			)}
 		</div>
 	);

@@ -1,4 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { loadFormState, saveFormState } from '../utils/storage';
 import { formatMinutes, sumTimeStrings } from '../utils/timeUtils';
 
@@ -29,45 +32,50 @@ export function TimeSumCalculator() {
 	}, [input]);
 
 	return (
-		<section className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 mt-4 border border-gray-100 card-hover">
-			<div className="mb-4">
-				<h3 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+		<Card className="shadow-lg hover:shadow-xl transition-all duration-300">
+			<CardHeader>
+				<CardTitle className="text-xl font-semibold flex items-center gap-2">
 					<span className="text-2xl">⏱️</span>
 					<span>Time Sum Calculator</span>
-				</h3>
-				<p className="text-xs text-gray-500 mt-1">
-					Paste time strings (one per line) in the format "HH hrs MM mins".
-				</p>
-			</div>
-			<textarea
-				id="ts-input"
-				rows={5}
-				className="w-full rounded-lg border border-gray-300 p-4 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all font-mono"
-				placeholder="37 hrs 56 mins&#10;29 hrs 44 mins&#10;41 hrs 1 min"
-				value={input}
-				onChange={(e) => setInput(e.target.value)}
-			/>
-			<div className="flex gap-2 mt-4">
-				<button
-					type="button"
-					id="ts-calc"
-					onClick={handleSumTimes}
-					className="bg-gray-800 hover:bg-gray-900 text-white px-6 py-2.5 rounded-lg font-medium shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2"
-				>
-					<span>➕</span>
-					<span>Sum times</span>
-				</button>
-			</div>
-			<pre
-				id="ts-output"
-				className="mt-4 text-base bg-white p-4 rounded-lg text-gray-800 border-2 border-violet-300 shadow-sm leading-relaxed"
-				style={{
-					fontFamily: 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif',
-					fontWeight: '600',
-				}}
-			>
-				{output}
-			</pre>
-		</section>
+				</CardTitle>
+			</CardHeader>
+			<CardContent className="flex flex-col gap-6">
+				<FieldGroup>
+					<Field>
+						<FieldLabel htmlFor="ts-input">Input Time Strings</FieldLabel>
+						<textarea
+							id="ts-input"
+							rows={5}
+							className="flex min-h-30 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-mono"
+							placeholder="37 hrs 56 mins&#10;29 hrs 44 mins&#10;41 hrs 1 min"
+							value={input}
+							onChange={(e) => setInput(e.target.value)}
+						/>
+						<FieldDescription>
+							Paste time strings (one per line) in the format "HH hrs MM mins".
+						</FieldDescription>
+					</Field>
+				</FieldGroup>
+
+				<div className="flex justify-start">
+					<Button onClick={handleSumTimes} variant="default" className="gap-2">
+						<span>➕</span>
+						<span>Sum times</span>
+					</Button>
+				</div>
+
+				<div className="bg-muted/50 rounded-lg p-4 border border-dashed">
+					<pre
+						id="ts-output"
+						className="text-lg font-bold text-primary text-center"
+						style={{
+							fontFamily: 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif',
+						}}
+					>
+						{output}
+					</pre>
+				</div>
+			</CardContent>
+		</Card>
 	);
 }

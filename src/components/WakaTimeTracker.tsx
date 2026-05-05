@@ -1,4 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Field, FieldGroup, FieldLabel } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
 import type { WakaTimeResult } from '../types/wakatime';
 import {
 	clearWakaTimeApiKey,
@@ -229,394 +236,381 @@ export function WakaTimeTracker({
 	}, [apiKey, projectName, billingStart, billingEnd, onDataFetch, setCompletedHours]);
 
 	return (
-		<div>
-			<p className="text-sm text-gray-600 mb-6">
+		<div className="flex flex-col gap-6">
+			<p className="text-sm text-muted-foreground">
 				Automatically track hours from WakaTime.com. Enter your API key, select a project and date
 				range, then fetch your tracked time data.
 			</p>
-			{/* Security Notice */}
-			<div className="mb-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-				<p className="text-xs text-yellow-800 flex items-center gap-2">
-					<span>🔒</span>
-					<span>
-						Your API key is stored locally in your browser. It is never sent to any third-party
-						servers except WakaTime.
-					</span>
-				</p>
-			</div>
-			{/* Proxy Active Notice */}
-			<div className="mb-4 bg-green-50 border border-green-200 rounded-lg p-3">
-				<p className="text-xs text-green-800 flex items-center gap-2">
-					<span>✅</span>
-					<span>
-						<strong>Proxy Active:</strong> This app uses a server-side proxy to securely communicate
-						with WakaTime API, eliminating CORS restrictions. Your API key is sent only to WakaTime
-						through our secure proxy.
-					</span>
-				</p>
-			</div>
-			{/* API Key Input */}
-			<div className="mb-4">
-				<label htmlFor="wt-api-key" className="text-sm font-medium text-gray-700 block mb-1">
-					🔑 WakaTime API Key (Secret Key)
-				</label>
-				<div className="flex gap-2">
-					<div className="flex-1 relative">
-						<input
-							id="wt-api-key"
-							type={showApiKey ? 'text' : 'password'}
-							className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all"
-							placeholder="waka_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-							value={apiKey}
-							onChange={(e) => setApiKey(e.target.value)}
-						/>
-						<button
-							type="button"
-							onClick={() => setShowApiKey(!showApiKey)}
-							className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 text-xs"
-						>
-							{showApiKey ? '🙈' : '👁️'}
-						</button>
-					</div>
-					<button
-						type="button"
-						onClick={handleValidateApiKey}
-						disabled={validating || !apiKey}
-						className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all"
-					>
-						{validating ? 'Testing...' : 'Test'}
-					</button>
-				</div>
-				<p className="text-xs text-gray-500 mt-1">
-					Get your API key from{' '}
-					<a
-						href="https://wakatime.com/settings/account"
-						target="_blank"
-						rel="noopener noreferrer"
-						className="text-violet-600 hover:underline"
-					>
-						WakaTime Settings
-					</a>
-				</p>
-			</div>
-			{/* Remember API Key Checkbox */}
-			<div className="mb-4">
-				<label className="inline-flex items-center gap-2 cursor-pointer group">
-					<input
-						type="checkbox"
-						className="rounded w-4 h-4 text-violet-600 border-gray-300 focus:ring-violet-500 cursor-pointer"
-						checked={rememberApiKey}
-						onChange={(e) => setRememberApiKey(e.target.checked)}
-					/>
-					<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
-						Remember API key (stored locally)
-					</span>
-				</label>
-			</div>
-			{/* Shared Business Context Fields */}
-			<div className="mb-4 bg-violet-50 rounded-lg p-4 border border-violet-200">
-				<h4 className="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
-					<span>📋</span>
-					<span>Business Context (Shared across all modules)</span>
-				</h4>
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-					<div>
-						<label htmlFor="wt-total" className="text-sm font-medium text-gray-700 block mb-1">
-							� Total required hours
-						</label>
-						<input
-							id="wt-total"
-							type="text"
-							placeholder="e.g., 160 hrs 0 mins"
-							className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all bg-white"
-							value={totalHours}
-							onChange={(e) => setTotalHours(e.target.value)}
-						/>
-					</div>
-					<div>
-						<label htmlFor="wt-completed" className="text-sm font-medium text-gray-700 block mb-1">
-							✅ Completed hours (auto-filled from WakaTime)
-						</label>
-						<input
-							id="wt-completed"
-							type="text"
-							placeholder="Will be calculated from WakaTime"
-							className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all bg-gray-100"
-							value={completedHours}
-							readOnly
-						/>
-					</div>
-					<div>
-						<label htmlFor="wt-rate" className="text-sm font-medium text-gray-700 block mb-1">
-							💰 Hourly rate (Rs/hr)
-						</label>
-						<input
-							id="wt-rate"
-							type="number"
-							min="0"
-							step="0.01"
-							placeholder="e.g., 500"
-							className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all bg-white"
-							value={hourlyRate}
-							onChange={(e) => setHourlyRate(e.target.value)}
-						/>
-					</div>
-					<div>
-						<label
-							htmlFor="wt-billing-start"
-							className="text-sm font-medium text-gray-700 block mb-1"
-						>
-							📅 Billing start
-						</label>
-						<input
-							id="wt-billing-start"
-							type="date"
-							className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all bg-white"
-							value={billingStart}
-							onChange={(e) => setBillingStart(e.target.value)}
-						/>
-					</div>
-					<div>
-						<label
-							htmlFor="wt-billing-end"
-							className="text-sm font-medium text-gray-700 block mb-1"
-						>
-							🏁 Billing end
-						</label>
-						<input
-							id="wt-billing-end"
-							type="date"
-							className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all bg-white"
-							value={billingEnd}
-							onChange={(e) => setBillingEnd(e.target.value)}
-						/>
-					</div>
+
+			<div className="flex flex-col gap-4">
+				{/* Notices */}
+				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<Alert className="bg-muted/30 border-dashed py-3">
+						<AlertTitle className="text-xs flex items-center gap-2">
+							<span>🔒</span> Secure
+						</AlertTitle>
+						<AlertDescription className="text-xs text-muted-foreground mt-1">
+							Your API key is stored locally in your browser. It is never sent to any third-party
+							servers except WakaTime.
+						</AlertDescription>
+					</Alert>
+					<Alert className="bg-primary/5 border-primary/10 py-3">
+						<AlertTitle className="text-xs flex items-center gap-2">
+							<span>✅</span> Proxy Active
+						</AlertTitle>
+						<AlertDescription className="text-xs text-muted-foreground mt-1">
+							This app uses a server-side proxy to securely communicate with WakaTime API,
+							eliminating CORS restrictions.
+						</AlertDescription>
+					</Alert>
 				</div>
 
-				{/* Weekend and Today Options */}
-				<div className="mt-4 flex gap-3 sm:gap-4 items-center flex-wrap">
-					<label className="inline-flex items-center gap-2 cursor-pointer group">
-						<input
-							type="checkbox"
-							className="rounded w-4 h-4 text-violet-600 border-gray-300 focus:ring-violet-500 cursor-pointer"
-							checked={skipSunday}
-							onChange={(e) => setSkipSunday(e.target.checked)}
-						/>
-						<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
-							Skip Sundays
-						</span>
-					</label>
-					<label className="inline-flex items-center gap-2 cursor-pointer group">
-						<input
-							type="checkbox"
-							className="rounded w-4 h-4 text-violet-600 border-gray-300 focus:ring-violet-500 cursor-pointer"
-							checked={skipSaturday}
-							onChange={(e) => setSkipSaturday(e.target.checked)}
-						/>
-						<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
-							Skip Saturdays
-						</span>
-					</label>
-					<label className="inline-flex items-center gap-2 cursor-pointer group">
-						<input
-							type="checkbox"
-							className="rounded w-4 h-4 text-violet-600 border-gray-300 focus:ring-violet-500 cursor-pointer"
-							checked={excludeToday}
-							onChange={(e) => setExcludeToday(e.target.checked)}
-						/>
-						<span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
-							Exclude today
-						</span>
-					</label>
-				</div>
-			</div>
-			{/* Summary Display */}
-			{calculatorResult && (
-				<div className="mb-4 bg-green-50 rounded-lg p-4 border-2 border-green-200">
-					<h4 className="text-sm font-semibold text-gray-800 mb-3 flex items-center gap-2">
-						<span>📊</span>
-						<span>Calculation Summary</span>
-					</h4>
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-						<div className="flex justify-between">
-							<span className="text-gray-600">Total hours:</span>
-							<span className="font-medium">
-								{Math.floor(calculatorResult.total / 60)} hrs {calculatorResult.total % 60} mins
-							</span>
-						</div>
-						<div className="flex justify-between">
-							<span className="text-gray-600">Completed hours:</span>
-							<span className="font-medium">
-								{Math.floor(calculatorResult.completed / 60)} hrs {calculatorResult.completed % 60}{' '}
-								mins
-							</span>
-						</div>
-						<div className="flex justify-between">
-							<span className="text-gray-600">Remaining hours:</span>
-							<span className="font-medium">
-								{Math.floor(Math.max(0, calculatorResult.remaining) / 60)} hrs{' '}
-								{Math.max(0, calculatorResult.remaining) % 60} mins
-							</span>
-						</div>
-						<div className="flex justify-between">
-							<span className="text-gray-600">Billing period:</span>
-							<span className="font-medium">
-								{calculatorResult.billingStart.toLocaleDateString()} to{' '}
-								{calculatorResult.billingEnd.toLocaleDateString()}
-							</span>
-						</div>
-						<div className="flex justify-between">
-							<span className="text-gray-600">Remaining days:</span>
-							<span className="font-medium">{calculatorResult.remainingDays}</span>
-						</div>
-						<div className="flex justify-between">
-							<span className="text-gray-600">Workdays:</span>
-							<span className="font-medium">{calculatorResult.workdays}</span>
-						</div>
-						<div className="flex justify-between col-span-1 md:col-span-2">
-							<span className="text-gray-600">Hours per day:</span>
-							<span className="font-medium">
-								{Math.floor(calculatorResult.perDay / 60)} hrs {calculatorResult.perDay % 60} mins
-							</span>
-						</div>
-					</div>
-				</div>
-			)}
-			{/* WakaTime Project Input */}
-			<div className="mb-4">
-				<label htmlFor="wt-project" className="text-sm font-medium text-gray-700 block mb-1">
-					📦 Project Name
-				</label>
-				<input
-					id="wt-project"
-					type="text"
-					list="project-suggestions"
-					className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-violet-500 focus:ring-2 focus:ring-violet-200 transition-all"
-					placeholder="e.g., my-project"
-					value={projectName}
-					onChange={(e) => setProjectName(e.target.value)}
-				/>
-				{projectSuggestions.length > 0 && (
-					<datalist id="project-suggestions">
-						{projectSuggestions.map((proj) => (
-							<option key={proj} value={proj} />
-						))}
-					</datalist>
-				)}
-			</div>{' '}
-			{/* Fetch Button */}
-			<div className="flex justify-end mb-4">
-				<button
-					type="button"
-					onClick={handleFetchData}
-					disabled={loading}
-					className="bg-violet-600 hover:bg-violet-700 disabled:bg-gray-400 text-white px-6 py-2.5 rounded-lg font-medium shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center gap-2"
-				>
-					{loading ? (
-						<>
-							<span className="animate-spin">⏳</span>
-							<span>Fetching...</span>
-						</>
-					) : (
-						<>
-							<span>Fetch Data</span>
-							<span>→</span>
-						</>
-					)}
-				</button>
-			</div>
-			{/* Error Display */}
-			{error && (
-				<div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
-					<p className="text-sm text-red-800 flex items-center gap-2">
-						<span>❌</span>
-						<span>{error}</span>
-					</p>
-				</div>
-			)}
-			{/* Results Display */}
-			{result && (
-				<div className="bg-violet-50 rounded-lg p-4 border-2 border-violet-200">
-					<div className="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-						<span>📊</span>
-						<span>WakaTime Summary</span>
-					</div>
-					<div className="bg-white rounded p-4 border border-violet-300 shadow-sm">
-						<div className="space-y-2 text-sm">
-							<p>
-								<strong>Project:</strong> {result.projectName}
-							</p>
-							<p>
-								<strong>Total Time:</strong> {result.digitalTime} ({result.totalHours} hours{' '}
-								{result.totalMinutes} minutes)
-							</p>
-							<p>
-								<strong>Period:</strong> {result.startDate} to {result.endDate}
-							</p>
-							<p>
-								<strong>Days with data:</strong> {result.daysWithData}
-							</p>
-							<p>
-								<strong>Average per day:</strong> {result.averageHoursPerDay.toFixed(2)} hours
-							</p>
-							{result.mostProductiveDay && (
-								<p>
-									<strong>Most productive day:</strong> {result.mostProductiveDay.date} (
-									{result.mostProductiveDay.hours.toFixed(2)} hours)
-								</p>
-							)}
-
-							{parseFloat(hourlyRate) > 0 && (
-								<>
-									<div className="mt-4 pt-4 border-t border-violet-200">
-										<p className="font-semibold text-violet-700 mb-2">💰 EARNINGS BREAKDOWN</p>
+				{/* API Key Input */}
+				<Card>
+					<CardContent className="pt-6">
+						<FieldGroup>
+							<Field>
+								<FieldLabel htmlFor="wt-api-key">🔑 WakaTime API Key</FieldLabel>
+								<div className="flex gap-2">
+									<div className="flex-1 relative">
+										<Input
+											id="wt-api-key"
+											type={showApiKey ? 'text' : 'password'}
+											placeholder="waka_xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+											value={apiKey}
+											onChange={(e) => setApiKey(e.target.value)}
+										/>
+										<button
+											type="button"
+											onClick={() => setShowApiKey(!showApiKey)}
+											className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+										>
+											{showApiKey ? '🙈' : '👁️'}
+										</button>
 									</div>
-									<p>
-										<strong>Hourly rate:</strong> Rs {parseFloat(hourlyRate).toFixed(2)}
-									</p>
-									<p>
-										<strong>Total earnings:</strong> Rs{' '}
-										{(
-											result.totalHours * parseFloat(hourlyRate) +
-											(result.totalMinutes / 60) * parseFloat(hourlyRate)
-										).toFixed(2)}
-									</p>
-									<p>
-										<strong>Average per day:</strong> Rs{' '}
-										{(result.averageHoursPerDay * parseFloat(hourlyRate)).toFixed(2)}
-									</p>
-								</>
-							)}
-
-							{result.languages.length > 0 && (
-								<div className="mt-4">
-									<strong>Languages:</strong>
-									<ul className="ml-4 mt-1">
-										{result.languages.slice(0, 5).map((lang) => (
-											<li key={lang.name}>
-												{lang.name}: {lang.hours.toFixed(2)}h ({lang.percent.toFixed(1)}%)
-											</li>
-										))}
-									</ul>
+									<Button
+										variant="outline"
+										onClick={handleValidateApiKey}
+										disabled={validating || !apiKey}
+									>
+										{validating ? 'Testing...' : 'Test'}
+									</Button>
 								</div>
-							)}
-
-							{result.editors.length > 0 && (
-								<div className="mt-4">
-									<strong>Editors:</strong>
-									<ul className="ml-4 mt-1">
-										{result.editors.map((editor) => (
-											<li key={editor.name}>
-												{editor.name}: {editor.hours.toFixed(2)}h ({editor.percent.toFixed(1)}%)
-											</li>
-										))}
-									</ul>
+								<div className="text-xs text-muted-foreground mt-1">
+									Get your API key from{' '}
+									<a
+										href="https://wakatime.com/settings/account"
+										target="_blank"
+										rel="noopener noreferrer"
+										className="text-primary hover:underline font-medium"
+									>
+										WakaTime Settings
+									</a>
 								</div>
-							)}
-						</div>
-					</div>
+							</Field>
+
+							<Field orientation="horizontal">
+								<Checkbox
+									id="wt-remember"
+									checked={rememberApiKey}
+									onCheckedChange={(v) => setRememberApiKey(!!v)}
+								/>
+								<FieldLabel htmlFor="wt-remember" className="text-sm font-normal">
+									Remember API key (stored locally)
+								</FieldLabel>
+							</Field>
+						</FieldGroup>
+					</CardContent>
+				</Card>
+
+				{/* Shared Business Context Fields */}
+				<Card className="bg-muted/30 border-dashed">
+					<CardHeader className="pb-3">
+						<CardTitle className="text-sm font-semibold flex items-center gap-2">
+							<span>📋</span>
+							<span>Business Context (Shared)</span>
+						</CardTitle>
+					</CardHeader>
+					<CardContent>
+						<FieldGroup>
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+								<Field>
+									<FieldLabel htmlFor="wt-total">📝 Total required hours</FieldLabel>
+									<Input
+										id="wt-total"
+										type="text"
+										placeholder="e.g., 160 hrs 0 mins"
+										value={totalHours}
+										onChange={(e) => setTotalHours(e.target.value)}
+									/>
+								</Field>
+								<Field>
+									<FieldLabel htmlFor="wt-completed">✅ Completed (auto-filled)</FieldLabel>
+									<Input
+										id="wt-completed"
+										type="text"
+										value={completedHours}
+										readOnly
+										className="bg-muted"
+									/>
+								</Field>
+								<Field>
+									<FieldLabel htmlFor="wt-rate">💰 Hourly rate (Rs/hr)</FieldLabel>
+									<Input
+										id="wt-rate"
+										type="number"
+										min="0"
+										step="0.01"
+										placeholder="e.g., 500"
+										value={hourlyRate}
+										onChange={(e) => setHourlyRate(e.target.value)}
+									/>
+								</Field>
+								<div className="grid grid-cols-2 gap-4">
+									<Field>
+										<FieldLabel htmlFor="wt-billing-start">📅 Start</FieldLabel>
+										<Input
+											id="wt-billing-start"
+											type="date"
+											value={billingStart}
+											onChange={(e) => setBillingStart(e.target.value)}
+										/>
+									</Field>
+									<Field>
+										<FieldLabel htmlFor="wt-billing-end">🏁 End</FieldLabel>
+										<Input
+											id="wt-billing-end"
+											type="date"
+											value={billingEnd}
+											onChange={(e) => setBillingEnd(e.target.value)}
+										/>
+									</Field>
+								</div>
+							</div>
+
+							{/* Weekend and Today Options */}
+							<div className="flex gap-4 items-center flex-wrap pt-2">
+								<Field orientation="horizontal" className="w-auto">
+									<Checkbox
+										id="wt-skip-sun"
+										checked={skipSunday}
+										onCheckedChange={(v) => setSkipSunday(!!v)}
+									/>
+									<FieldLabel htmlFor="wt-skip-sun" className="text-sm font-normal">
+										Skip Sundays
+									</FieldLabel>
+								</Field>
+								<Field orientation="horizontal" className="w-auto">
+									<Checkbox
+										id="wt-skip-sat"
+										checked={skipSaturday}
+										onCheckedChange={(v) => setSkipSaturday(!!v)}
+									/>
+									<FieldLabel htmlFor="wt-skip-sat" className="text-sm font-normal">
+										Skip Saturdays
+									</FieldLabel>
+								</Field>
+								<Field orientation="horizontal" className="w-auto">
+									<Checkbox
+										id="wt-ex-today"
+										checked={excludeToday}
+										onCheckedChange={(v) => setExcludeToday(!!v)}
+									/>
+									<FieldLabel htmlFor="wt-ex-today" className="text-sm font-normal">
+										Exclude today
+									</FieldLabel>
+								</Field>
+							</div>
+						</FieldGroup>
+					</CardContent>
+				</Card>
+
+				{/* Calculation Summary - Inline if available */}
+				{calculatorResult && (
+					<Card className="bg-primary/5 border-primary/20">
+						<CardHeader className="pb-3">
+							<CardTitle className="text-sm font-semibold flex items-center gap-2">
+								<span>📊</span>
+								<span>Calculation Summary</span>
+							</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+								<div>
+									<div className="text-muted-foreground text-xs">Remaining</div>
+									<div className="font-bold text-primary">
+										{Math.floor(Math.max(0, calculatorResult.remaining) / 60)}h{' '}
+										{Math.max(0, calculatorResult.remaining) % 60}m
+									</div>
+								</div>
+								<div>
+									<div className="text-muted-foreground text-xs">Workdays</div>
+									<div className="font-bold">{calculatorResult.workdays}</div>
+								</div>
+								<div>
+									<div className="text-muted-foreground text-xs">Per Day</div>
+									<div className="font-bold">
+										{Math.floor(calculatorResult.perDay / 60)}h{' '}
+										{Math.floor(calculatorResult.perDay % 60)}m
+									</div>
+								</div>
+								<div>
+									<div className="text-muted-foreground text-xs">Progress</div>
+									<div className="font-bold">
+										{Math.round((calculatorResult.completed / calculatorResult.total) * 100)}%
+									</div>
+								</div>
+							</div>
+						</CardContent>
+					</Card>
+				)}
+
+				{/* WakaTime Project Input */}
+				<div className="flex flex-col sm:flex-row gap-4 items-end">
+					<Field className="flex-1">
+						<FieldLabel htmlFor="wt-project">📦 Project Name</FieldLabel>
+						<Input
+							id="wt-project"
+							type="text"
+							list="project-suggestions"
+							placeholder="e.g., my-project"
+							value={projectName}
+							onChange={(e) => setProjectName(e.target.value)}
+						/>
+						{projectSuggestions.length > 0 && (
+							<datalist id="project-suggestions">
+								{projectSuggestions.map((proj) => (
+									<option key={proj} value={proj} />
+								))}
+							</datalist>
+						)}
+					</Field>
+					<Button
+						onClick={handleFetchData}
+						disabled={loading}
+						size="lg"
+						className="w-full sm:w-auto min-w-35"
+					>
+						{loading ? (
+							<>
+								<span className="animate-spin mr-2">⏳</span>
+								Fetching...
+							</>
+						) : (
+							<>
+								Fetch Data
+								<span className="ml-2">→</span>
+							</>
+						)}
+					</Button>
 				</div>
-			)}
+
+				{/* Error Display */}
+				{error && (
+					<Alert variant="destructive">
+						<AlertTitle className="text-xs">Error</AlertTitle>
+						<AlertDescription className="text-xs">{error}</AlertDescription>
+					</Alert>
+				)}
+
+				{/* Results Display */}
+				{result && (
+					<Card className="border-primary/30">
+						<CardHeader className="pb-3">
+							<CardTitle className="text-sm font-semibold flex items-center gap-2">
+								<span>📊</span>
+								<span>WakaTime Analysis: {result.projectName}</span>
+							</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+								<div className="space-y-4">
+									<div className="grid grid-cols-2 gap-2 text-sm">
+										<span className="text-muted-foreground">Total Time:</span>
+										<span className="font-semibold">
+											{result.digitalTime} ({result.totalHours}h {result.totalMinutes}m)
+										</span>
+
+										<span className="text-muted-foreground">Period:</span>
+										<span className="font-medium">
+											{result.startDate} to {result.endDate}
+										</span>
+
+										<span className="text-muted-foreground">Days with data:</span>
+										<span className="font-medium">{result.daysWithData}</span>
+
+										<span className="text-muted-foreground">Daily Avg:</span>
+										<span className="font-medium text-primary">
+											{result.averageHoursPerDay.toFixed(2)}h
+										</span>
+									</div>
+
+									{parseFloat(hourlyRate) > 0 && (
+										<div className="bg-primary/5 rounded-lg p-3 border border-primary/10">
+											<div className="text-xs font-semibold text-primary mb-2 uppercase tracking-wider">
+												Earnings Estimation
+											</div>
+											<div className="grid grid-cols-2 gap-1 text-sm">
+												<span className="text-muted-foreground">Total:</span>
+												<span className="font-bold">
+													Rs{' '}
+													{(
+														result.totalHours * parseFloat(hourlyRate) +
+														(result.totalMinutes / 60) * parseFloat(hourlyRate)
+													).toFixed(2)}
+												</span>
+												<span className="text-muted-foreground">Daily:</span>
+												<span className="font-medium">
+													Rs {(result.averageHoursPerDay * parseFloat(hourlyRate)).toFixed(2)}
+												</span>
+											</div>
+										</div>
+									)}
+								</div>
+
+								<div className="space-y-4">
+									{result.languages.length > 0 && (
+										<div>
+											<div className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
+												Top Languages
+											</div>
+											<div className="flex flex-wrap gap-2">
+												{result.languages.slice(0, 5).map((lang) => (
+													<Badge
+														key={lang.name}
+														variant="secondary"
+														className="flex flex-col items-start gap-0.5 py-1.5 px-3"
+													>
+														<span className="font-bold">{lang.name}</span>
+														<span className="text-[10px] opacity-70">
+															{lang.hours.toFixed(1)}h ({lang.percent.toFixed(0)}%)
+														</span>
+													</Badge>
+												))}
+											</div>
+										</div>
+									)}
+
+									{result.editors.length > 0 && (
+										<div>
+											<div className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wider">
+												IDE Usage
+											</div>
+											<div className="flex flex-wrap gap-2">
+												{result.editors.map((editor) => (
+													<Badge key={editor.name} variant="outline" className="text-xs">
+														{editor.name}
+													</Badge>
+												))}
+											</div>
+										</div>
+									)}
+								</div>
+							</div>
+						</CardContent>
+					</Card>
+				)}
+			</div>
 		</div>
 	);
 }
